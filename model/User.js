@@ -13,7 +13,11 @@ const userSchema = new mongoose.Schema({
         required: [true, 'Password is required'],
         minlength: [6, 'Password needs to be at least 6 characters long'],
         maxlength: [12, 'Password cant have more than 12 characters']
-    }
+    },
+    role: {
+        type: String,
+        required: [true, 'Please set your role'],
+        enum: ['user','doc']}
 });
 
 const User = mongoose.model('User', userSchema);

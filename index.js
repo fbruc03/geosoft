@@ -83,12 +83,15 @@ router.get('/register', (req, res) => {
 //POST request to register
 router.post('/register', async (req, res) => {
     username = req.body.username;
+    role = req.body.role;
     password1 = req.body.password1;
     password2 = req.body.password2;
 
+    //TODO man kann zwei user mit gleichem usernamen erstellen
     if(password2 == password1) {
         var newuser = new User();
         newuser.username = username;
+        newuser.role = role;
         newuser.password = password1;
 
         newuser.save(function(err, savedUser) {
