@@ -1,0 +1,32 @@
+#mapid { height: 600px; }
+
+.myForm
+{
+    width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.flex-fill {
+    flex:1 1 auto;
+ }
+
+html {
+    height: 100vh;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding-bottom: 70px;
+}
+
+main {
+    flex: 1;
+    margin-top: 56px;
+}
+
+footer {
+    height: 10vh;
+}
