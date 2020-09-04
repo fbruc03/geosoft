@@ -36,12 +36,14 @@ db.once('open', function () {
 
 //GET request to /
 router.get('/', (req, res) => {
+    console.log('Cookies: ', req.cookies.cookie);
     res.sendFile(__dirname + '/views/index.html');
 })
 
 //GET request to dashboard
 router.get('/dashboard', (req, res) => {
-    if(req.cookies['cookie'] == 'geosoft') {
+    //ist cookie vorhanden?
+    if(req.cookies.cookie !== undefined) {
         res.sendFile(__dirname + '/views/dashboard.html');
     } else {
         res.sendFile(__dirname + '/views/login.html');
@@ -68,7 +70,7 @@ router.post('/login', (req, res) => {
         //Wenn ja -> User einloggen
         else if (result == true) {
             //Cookie setzen maxAge 1000*1 = 1 Sekunde
-            res.cookie('cookie', 'geosoft', {maxAge: 1000 * 1 * 60 * 5, httpOnly: false});
+            res.cookie('cookie', username, {maxAge: 1000 * 1 * 60 * 5, httpOnly: false});
             res.sendFile(__dirname + '/views/dashboard.html')
         }
     })
