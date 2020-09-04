@@ -11,8 +11,6 @@ var app = express();
 
 //Middleware
 app.use(cookieParser());
-
-// parse
 app.use(bodyParser.json())      // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
@@ -24,11 +22,12 @@ app.use('/leaflet', express.static(__dirname + '/node_modules/leaflet/dist/'));
 app.use('/css', express.static(__dirname + '/css/'));
 app.use('/script', express.static(__dirname + '/script/'));
 
+// DB connection
 mongoose.connect('mongodb://localhost/geosoft', {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useCreateIndex: true
 });
-
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
@@ -87,22 +86,31 @@ router.post('/register', async (req, res) => {
     password1 = req.body.password1;
     password2 = req.body.password2;
 
-    //TODO man kann zwei user mit gleichem usernamen erstellen
+    //Stimmen passwörter überein?
     if(password2 == password1) {
+        // neues user objekt mit userSchema erzeugen
         var newuser = new User();
         newuser.username = username;
         newuser.role = role;
         newuser.password = password1;
 
-        newuser.save(function(err, savedUser) {
+        User.exists({'username': username}, (err, doc) => {
             if(err) {
-                res.send(err.message);
-            } else {
-                res.send('User added');
+                res.send(err);
+            } else if (doc == true) { // username existiert bereits
+                res.send('Username already exists')
+            } else { // username noch nicht vergeben -> neuen user erstellen
+                newuser.save(function(err, savedUser) {
+                    if(err) {
+                        res.send(err.message);
+                    } else {
+                        res.send('User added');
+                    }
+                })
             }
         })
     } else {
-        res.send('Passwords neew to be the same');
+        res.send('Password not equal');
     }
 })
 
