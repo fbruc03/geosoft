@@ -21,7 +21,6 @@ function getNextBusstops(apiKey, location) {
 }
 
 function getNextDepartures(location) {
-	console.log(document.cookie);
 	$.ajax({
 		url: 'https://transit.hereapi.com/v8/departures?apiKey=' + apiKey + '&in=' + location,
 		type: 'GET',
@@ -64,7 +63,7 @@ function setBusstops(object) {
  * @desc request geolocation of the browser
  * @returns array [latitude, longitude]
  */
-function getLocation() {
+async function getLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function (position) {
 			console.log(position.coords);

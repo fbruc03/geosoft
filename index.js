@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 
 
 var User = require(__dirname + '/model/User');
+var Ride = require(__dirname + '/model/Ride');
 
 var router = express.Router();
 
@@ -125,6 +126,26 @@ router.get('/logout', (req, res) => {
     res.cookie('cookie', '', {maxAge: 1, httpOnly: false});
     res.cookie('apiKey', '',{maxAge: 1, httpOnly: false});
     res.sendFile(__dirname + '/views/index.html');
+})
+
+router.post('/addride', (req,res) => {
+
+    var agency = req.body.agency;
+    var number = req.body.number;
+    var user = req.body.user;
+
+    var newride = new Ride();
+    newride.agency = agency;
+    newride.number = number;
+    newride.user = user;
+
+    newride.save(function(err, savedRide) {
+        if(err) {
+            res.send(err.message);
+        } else {
+            res.sendFile(__dirname + '/views/dashboard.html');
+        }
+    })
 })
 
 app.use("/", router);
