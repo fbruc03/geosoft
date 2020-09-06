@@ -30,3 +30,7 @@ main {
 footer {
     height: 10vh;
 }
+
+table {
+    width: 100%;
+}

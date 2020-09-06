@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
+
 var User = require(__dirname + '/model/User');
 
 var router = express.Router();
@@ -21,9 +22,10 @@ app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
 app.use('/leaflet', express.static(__dirname + '/node_modules/leaflet/dist/'));
 app.use('/css', express.static(__dirname + '/css/'));
 app.use('/script', express.static(__dirname + '/script/'));
+app.use('/images', express.static(__dirname + '/images/'));
 
 // DB connection
-mongoose.connect('mongodb://localhost/geosoft', {
+mongoose.connect('mongodb://127.0.0.1/geosoft', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true
@@ -59,6 +61,7 @@ router.get('/login', (req, res) => {
 router.post('/login', (req, res) => {
     var username = req.body.username;
     var password = req.body.password;
+    var apiKey = req.body.apiKey;
     // Eingabe richtig?
     User.exists({ 'username': username, 'password': password }, (err, result) => {
         if (err) {
@@ -71,6 +74,7 @@ router.post('/login', (req, res) => {
         else if (result == true) {
             //Cookie setzen maxAge 1000*1 = 1 Sekunde
             res.cookie('cookie', username, {maxAge: 1000 * 1 * 60 * 5, httpOnly: false});
+            res.cookie('apiKey', apiKey, {maxAge: 1000 * 1 * 60 * 5, httpOnly: false});
             res.sendFile(__dirname + '/views/dashboard.html')
         }
     })
@@ -106,7 +110,7 @@ router.post('/register', async (req, res) => {
                     if(err) {
                         res.send(err.message);
                     } else {
-                        res.send('User added');
+                        res.sendFile(__dirname + '/views/login.html');
                     }
                 })
             }
@@ -118,7 +122,8 @@ router.post('/register', async (req, res) => {
 
 router.get('/logout', (req, res) => {
     //Cookie auf eine Millisekunde, dann weiterleiten
-    res.cookie('cookie', 'geosoft', {maxAge: 1, httpOnly: false});
+    res.cookie('cookie', '', {maxAge: 1, httpOnly: false});
+    res.cookie('apiKey', '',{maxAge: 1, httpOnly: false});
     res.sendFile(__dirname + '/views/index.html');
 })
 
