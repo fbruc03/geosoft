@@ -143,7 +143,8 @@ router.post('/addride', (req,res) => {
         if(err) {
             res.send(err.message);
         } else {
-            res.sendFile(__dirname + '/views/dashboard.html');
+            res.send(newride);
+            //res.sendFile(__dirname + '/views/dashboard.html');
         }
     })
 })

@@ -9,8 +9,8 @@ const rideSchema = new mongoose.Schema({
         required: [true, 'Bus number is required']
     },
     user : {
-        type: String,
-        required: [true, 'Username is required']
+        type: [String, [Number, Number]],
+        required: [true, 'Username and Location is required']
     }
 });
 
