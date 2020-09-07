@@ -63,7 +63,7 @@ function generateDeparturesTable(object, busstop, name) {
 	var div = document.createElement('div');
 
 	var head = document.createElement('h4');
-	head.innerHTML = name;
+	head.innerHTML = name.split('|')[0];
 	div.appendChild(head);
 
 	var table = document.createElement('table');
@@ -93,8 +93,11 @@ function generateDeparturesTable(object, busstop, name) {
 		tr1.appendChild(tdtime);
 
 		tdnumber.innerHTML = object[i].transport.name;
-		tddirection.innerHTML = object[i].transport.headsign;
-		tdtime.innerHTML = object[i].time;
+		tddirection.innerHTML = object[i].transport.headsign.split('|')[0];
+
+		tdtime.innerHTML = object[i].time.split('T')[1].split('+')[0];
+
+		var date = object[i].time.split('T')[0]
 	}
 
 	busstop.bindPopup(div);
@@ -108,7 +111,6 @@ function generateDeparturesTable(object, busstop, name) {
 function getLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition( function (position) {
-			console.log(position.coords);
 			var coordinates = [position.coords.latitude, position.coords.longitude];
 			getNextDepartures(coordinates);
 			return coordinates;
