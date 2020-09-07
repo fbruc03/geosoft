@@ -39,7 +39,6 @@ db.once('open', function () {
 
 //GET request to /
 router.get('/', (req, res) => {
-    console.log('Cookies: ', req.cookies.cookie);
     res.sendFile(__dirname + '/views/index.html');
 })
 
