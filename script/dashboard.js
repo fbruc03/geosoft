@@ -16,7 +16,7 @@ function getNextBusstops(apiKey, location) {
 		success: (response) => {
 			console.log(response);
 		},
-		error: function () { alert('Failed!!!'); }
+		error: function () { alert('Failed!!!!'); }
 	});
 }
 
