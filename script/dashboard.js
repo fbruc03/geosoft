@@ -54,8 +54,50 @@ function setLocationMarker(coordinates) {
 function setBusstops(object) {
 	for (let i = 0; i < object.boards.length; i++) {
 		var busstop = L.marker(object.boards[i].place.location, {icon: busIcon}).addTo(mymap);
-		busstop.bindPopup(object.boards[i].place.name);
+		generateDeparturesTable(object.boards[i].departures, busstop, object.boards[i].place.name);
 	}
+}
+
+function generateDeparturesTable(object, busstop, name) {
+
+	var div = document.createElement('div');
+
+	var head = document.createElement('h4');
+	head.innerHTML = name;
+	div.appendChild(head);
+
+	var table = document.createElement('table');
+	div.appendChild(table);
+	var tr = document.createElement('tr');
+	table.appendChild(tr);
+
+	var busnumber = document.createElement('th');
+	busnumber.innerHTML = 'Busnumber';
+	var direction = document.createElement('th');
+	direction.innerHTML = 'Direction';
+	var time = document.createElement('th');
+	time.innerHTML = 'Departure time';
+
+	tr.appendChild(busnumber);
+	tr.appendChild(direction);
+	tr.appendChild(time);
+
+	for (let i = 0; i < object.length; i++) {
+		var tr1 = document.createElement('tr');
+		table.appendChild(tr1)
+		var tdnumber = document.createElement('td');
+		tr1.appendChild(tdnumber);
+		var tddirection = document.createElement('td');
+		tr1.appendChild(tddirection);
+		var tdtime = document.createElement('td');
+		tr1.appendChild(tdtime);
+
+		tdnumber.innerHTML = object[i].transport.name;
+		tddirection.innerHTML = object[i].transport.headsign;
+		tdtime.innerHTML = object[i].time;
+	}
+
+	busstop.bindPopup(div);
 }
 
 /**
