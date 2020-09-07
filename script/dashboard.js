@@ -63,11 +63,12 @@ function setBusstops(object) {
  * @desc request geolocation of the browser
  * @returns array [latitude, longitude]
  */
-async function getLocation() {
+function getLocation() {
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function (position) {
+        navigator.geolocation.getCurrentPosition( function (position) {
 			console.log(position.coords);
 			var coordinates = [position.coords.latitude, position.coords.longitude];
+			getNextDepartures(coordinates);
 			return coordinates;
         });
     } else {
@@ -75,6 +76,8 @@ async function getLocation() {
     }
 }
 
+
+//get api Key from cookies
 const apiKey = document.cookie
   .split('; ')
   .find(row => row.startsWith('apiKey'))
@@ -86,4 +89,5 @@ var busIcon = L.icon({
 	iconSize: [38, 38]
 })
 
-getNextDepartures([51.955492, 7.645728]);
+
+getLocation();

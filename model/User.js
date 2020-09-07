@@ -6,13 +6,13 @@ const userSchema = new mongoose.Schema({
         required: [true, 'Username is required'],
         unique: [true, 'Username already taken'],
         minlength: [6, 'Username needs to be at least 6 characters long'],
-        maxlength: [12, 'Username cant have more than 12 characters']
+        maxlength: [64, 'Username cant have more than 12 characters']
     },
     password: {
         type: String,
         required: [true, 'Password is required'],
         minlength: [6, 'Password needs to be at least 6 characters long'],
-        maxlength: [12, 'Password cant have more than 12 characters']
+        maxlength: [64, 'Password cant have more than 12 characters']
     },
     role: {
         type: String,
