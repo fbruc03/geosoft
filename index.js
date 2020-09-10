@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-var Tabulator = require('tabulator-tables');
 
 
 var User = require(__dirname + '/model/User');
@@ -159,11 +158,13 @@ router.post('/addride', (req, res) => {
     busnumber = req.body.busnumber;
     location = [req.body.location.lat, req.body.location.lng];
     date = req.body.date;
+    name = req.body.name;
 
     var takenBus = {
         "busnumber": busnumber,
         "location": location,
-        "date": date
+        "date": date,
+        "name": name
     }
 
     //Add the takenBus ride to the user
@@ -179,6 +180,20 @@ router.post('/addride', (req, res) => {
                 res.sendFile(__dirname + '/views/dashboard.html')
             }
         });
+})
+
+router.post('/getrides', (req, res) => {
+
+    username = req.body.username;
+
+    User.findOne({ username: username }, (err, resp) => {
+		if(err) {
+			res.send(err);
+		}
+		if(resp) {
+			res.send(resp.takenBusses);
+		}
+	});
 })
 
 app.use("/", router);

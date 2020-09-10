@@ -7,19 +7,6 @@ var OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{
 
 OpenStreetMap_Mapnik.addTo(mymap);
 
-function getNextBusstops(apiKey, location) {
-	$.ajax({
-		url: 'https://transit.hereapi.com/v8/stations?apiKey=' + apiKey + '&in=' + location,
-		type: 'GET',
-		crossDomain: true,
-		dataType: 'json',
-		success: (response) => {
-			console.log(response);
-		},
-		error: function () { alert('Failed!!!'); }
-	});
-}
-
 function getNextDepartures(location) {
 	$.ajax({
 		url: 'https://transit.hereapi.com/v8/departures?apiKey=' + apiKey + '&in=' + location,
@@ -81,6 +68,12 @@ const apiKey = document.cookie
 	.find(row => row.startsWith('apiKey'))
 	.split('=')[1];
 
+//get username from cookies
+const user = document.cookie
+	.split('; ')
+	.find(row => row.startsWith('cookie'))
+	.split('=')[1];
+
 var busIcon = L.icon({
 	// Icon from https://www.flaticon.com/de/autoren/freepik
 	iconUrl: '/images/bahnhof.png',
@@ -96,10 +89,11 @@ function generateDeparturesTable(object, busstop, i) {
 		height: 205,
 		layout: "fitColumns",
 		columns: [
+			{ title: "From", field: "name"},
 			{ title: "Busnumber", field: "busnumber" },
 			{ title: "Direction", field: "direction" },
 			{ title: "Departure time", field: "departuretime" },
-			{ title: "Location", field: "location"}
+			{ title: "Location", field: "location"},
 		],
 		rowClick: function (e, row) {
 
@@ -109,11 +103,13 @@ function generateDeparturesTable(object, busstop, i) {
 			var lng = parseFloat(row.getData().location.split(',')[1]);
 			var location = {lat, lng};
 			var date = row.getData().departuretime;
+			var name = row.getData().name;
 			//Create object
 			var newRide = {
 				"busnumber": busnumber,
 				"location": location,
-				"date": date
+				"date": date,
+				"name": name
 			}
 			sendRideData(newRide);
 			alert('Added!');
@@ -127,7 +123,8 @@ function generateDeparturesTable(object, busstop, i) {
 			busnumber: object.departures[i].transport.name,
 			direction: object.departures[i].transport.headsign,
 			departuretime: object.departures[i].time.split('+')[0],
-			location: object.place.location.lat + "," + object.place.location.lng
+			location: object.place.location.lat + "," + object.place.location.lng,
+			name: object.place.name
 		}
 		tabledata.push(departure);
 	}
@@ -148,4 +145,17 @@ function sendRideData(object) {
 	  });
 }
 
+function getRides() {
+	//POST request to /getrides
+	$.ajax({
+		type: "POST",
+		url: "http://localhost:3000/getrides",
+		data: {username: user},
+		success: (resp) => {
+			console.log(resp);
+		}
+	  });
+}
+
 getLocation();
+getRides();
