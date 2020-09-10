@@ -8,9 +8,12 @@ DONE:
 
 - (*) Ein Nutzerprofil sollte Passwortgeschützt sein
 
-TODO:
-
 - Ein Nutzer kann eine aktuelle Abfahrt an einer Haltestelle vor Ort auswählen. Für diese wird dann im Server markiert, dass sie vom Nutzer genommen wurde.
+
+- Die Auswahlkarte zeigt die Nutzerposition, sowie die Standorte naheliegender Haltestellen an. Der Nutzer kann dort eine Auswahl über die genommene Fahrt treffen.
+
+
+TODO:
 
 - Bei einer positiven Diagnose kann ein Arzt alle Fahrten eines Nutzers für einen gewissen Zeitraum als Risiko markieren. Diese Funktion ist für den normalen Nutzer nicht frei zugänglich.
 
@@ -21,8 +24,6 @@ TODO:
 - Das Front-End auf der Client-Seite erlaubt dem Nutzer seine Fahrten zu wählen und das Risiko für seine gespeicherten Fahrten einzusehen.
 
 - Für die Auswahl, und Einsicht der Fahrten gibt es jeweils ein Leaflet Karten-Interface.
-
-- Die Auswahlkarte zeigt die Nutzerposition, sowie die Standorte naheliegender Haltestellen an. Der Nutzer kann dort eine Auswahl über die genommene Fahrt treffen.
 
 - Die Karte zur Einsicht der Fahrten zeigt dem Nutzer an, von welchem Standort sie welche Fahrten genommen haben. Risiko-Fahrten werden hier besonders hervorgehoben.
 
