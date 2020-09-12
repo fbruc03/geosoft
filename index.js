@@ -57,9 +57,19 @@ router.get('/dashboard', (req, res) => {
     }
 })
 
+//GET request to rides
+router.get('/myrides', (req, res) => {
+    res.sendFile(__dirname + '/views/rides.html');
+})
+
 //GET request to login
 router.get('/login', (req, res) => {
-    res.sendFile(__dirname + '/views/login.html');
+    //ist cookie vorhanden?
+    if (req.cookies.cookie !== undefined) {
+        res.sendFile(__dirname + '/views/rides.html');
+    } else {
+        res.sendFile(__dirname + '/views/login.html');
+    }
 })
 
 /**
