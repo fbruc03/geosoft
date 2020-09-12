@@ -5,7 +5,6 @@ const cookieParser = require('cookie-parser');
 
 
 var User = require(__dirname + '/model/User');
-var Ride = require(__dirname + '/model/Ride');
 
 var router = express.Router();
 
@@ -21,6 +20,7 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 app.use('/bootstrap', express.static(__dirname + '/node_modules/bootstrap/dist/'));
 app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
 app.use('/leaflet', express.static(__dirname + '/node_modules/leaflet/dist/'));
+app.use('/tabulator-tables', express.static(__dirname + '/node_modules/tabulator-tables/dist/'));
 app.use('/css', express.static(__dirname + '/css/'));
 app.use('/script', express.static(__dirname + '/script/'));
 app.use('/images', express.static(__dirname + '/images/'));
@@ -39,13 +39,18 @@ db.once('open', function () {
 
 //GET request to /
 router.get('/', (req, res) => {
-    res.sendFile(__dirname + '/views/index.html');
+    //ist cookie vorhanden?
+    if (req.cookies.cookie !== undefined) {
+        res.sendFile(__dirname + '/views/home.html');
+    } else {
+        res.sendFile(__dirname + '/views/index.html');
+    }
 })
 
 //GET request to dashboard
 router.get('/dashboard', (req, res) => {
     //ist cookie vorhanden?
-    if(req.cookies.cookie !== undefined) {
+    if (req.cookies.cookie !== undefined) {
         res.sendFile(__dirname + '/views/dashboard.html');
     } else {
         res.sendFile(__dirname + '/views/login.html');
@@ -57,7 +62,11 @@ router.get('/login', (req, res) => {
     res.sendFile(__dirname + '/views/login.html');
 })
 
-//POST request to login
+/**
+ * @function login
+ * @desc login user and set cookies
+ * @returns void
+ */
 router.post('/login', (req, res) => {
     var username = req.body.username;
     var password = req.body.password;
@@ -73,8 +82,8 @@ router.post('/login', (req, res) => {
         //Wenn ja -> User einloggen
         else if (result == true) {
             //Cookie setzen maxAge 1000*1 = 1 Sekunde
-            res.cookie('cookie', username, {maxAge: 1000 * 1 * 60 * 60, httpOnly: false});
-            res.cookie('apiKey', apiKey, {maxAge: 1000 * 1 * 60 * 60, httpOnly: false});
+            res.cookie('cookie', username, { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
+            res.cookie('apiKey', apiKey, { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
             res.sendFile(__dirname + '/views/dashboard.html')
         }
     })
@@ -85,7 +94,11 @@ router.get('/register', (req, res) => {
     res.sendFile(__dirname + '/views/register.html');
 })
 
-//POST request to register
+/**
+ * @function register
+ * @desc register new user
+ * @returns void
+ */
 router.post('/register', async (req, res) => {
     username = req.body.username;
     role = req.body.role;
@@ -93,21 +106,22 @@ router.post('/register', async (req, res) => {
     password2 = req.body.password2;
 
     //Stimmen passwörter überein?
-    if(password2 == password1) {
+    if (password2 == password1) {
         // neues user objekt mit userSchema erzeugen
         var newuser = new User();
         newuser.username = username;
         newuser.role = role;
         newuser.password = password1;
+        newuser.danger = 'low';
 
-        User.exists({'username': username}, (err, doc) => {
-            if(err) {
+        User.exists({ 'username': username }, (err, doc) => {
+            if (err) {
                 res.send(err);
             } else if (doc == true) { // username existiert bereits
                 res.send('Username already exists')
             } else { // username noch nicht vergeben -> neuen user erstellen
-                newuser.save(function(err, savedUser) {
-                    if(err) {
+                newuser.save(function (err, savedUser) {
+                    if (err) {
                         res.send(err.message);
                     } else {
                         res.sendFile(__dirname + '/views/login.html');
@@ -120,32 +134,66 @@ router.post('/register', async (req, res) => {
     }
 })
 
+/**
+ * @function logout
+ * @desc log out the user / delete cookies
+ * @returns void
+ */
 router.get('/logout', (req, res) => {
     //Cookie auf eine Millisekunde, dann weiterleiten
-    res.cookie('cookie', '', {maxAge: 1, httpOnly: false});
-    res.cookie('apiKey', '',{maxAge: 1, httpOnly: false});
+    res.cookie('cookie', '', { maxAge: 1, httpOnly: false });
+    res.cookie('apiKey', '', { maxAge: 1, httpOnly: false });
     res.sendFile(__dirname + '/views/index.html');
 })
 
-router.post('/addride', (req,res) => {
 
-    var agency = req.body.agency;
-    var number = req.body.number;
-    var user = req.body.user;
+/**
+ * @function addride
+ * @desc add Bus ride to specific user
+ * @returns void
+ */
+router.post('/addride', (req, res) => {
 
-    var newride = new Ride();
-    newride.agency = agency;
-    newride.number = number;
-    newride.user = user;
+    username = req.cookies.cookie;
+    busnumber = req.body.busnumber;
+    location = [req.body.location.lat, req.body.location.lng];
+    date = req.body.date;
+    name = req.body.name;
 
-    newride.save(function(err, savedRide) {
-        if(err) {
-            res.send(err.message);
-        } else {
-            res.send(newride);
-            //res.sendFile(__dirname + '/views/dashboard.html');
-        }
-    })
+    var takenBus = {
+        "busnumber": busnumber,
+        "location": location,
+        "date": date,
+        "name": name
+    }
+
+    //Add the takenBus ride to the user
+    User.findOneAndUpdate(
+        { username: username },
+        { $push: { takenBusses: takenBus } },
+        function (error, success) {
+            if (error) {
+                console.log(error);
+                res.send(error)
+            } else {
+                console.log(success);
+                res.sendFile(__dirname + '/views/dashboard.html')
+            }
+        });
+})
+
+router.post('/getrides', (req, res) => {
+
+    username = req.body.username;
+
+    User.findOne({ username: username }, (err, resp) => {
+		if(err) {
+			res.send(err);
+		}
+		if(resp) {
+			res.send(resp.takenBusses);
+		}
+	});
 })
 
 app.use("/", router);

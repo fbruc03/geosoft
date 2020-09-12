@@ -7,19 +7,6 @@ var OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{
 
 OpenStreetMap_Mapnik.addTo(mymap);
 
-function getNextBusstops(apiKey, location) {
-	$.ajax({
-		url: 'https://transit.hereapi.com/v8/stations?apiKey=' + apiKey + '&in=' + location,
-		type: 'GET',
-		crossDomain: true,
-		dataType: 'json',
-		success: (response) => {
-			console.log(response);
-		},
-		error: function () { alert('Failed!!!'); }
-	});
-}
-
 function getNextDepartures(location) {
 	$.ajax({
 		url: 'https://transit.hereapi.com/v8/departures?apiKey=' + apiKey + '&in=' + location,
@@ -30,7 +17,6 @@ function getNextDepartures(location) {
 			mymap.setView(location, 16);
 			setLocationMarker(location);
 			setBusstops(response);
-			console.log(response);
 		},
 		error: function () { alert('Failed!'); }
 	});
@@ -53,54 +39,9 @@ function setLocationMarker(coordinates) {
  */
 function setBusstops(object) {
 	for (let i = 0; i < object.boards.length; i++) {
-		var busstop = L.marker(object.boards[i].place.location, {icon: busIcon}).addTo(mymap);
-		generateDeparturesTable(object.boards[i].departures, busstop, object.boards[i].place.name);
+		var busstop = L.marker(object.boards[i].place.location, { icon: busIcon }).addTo(mymap);
+		generateDeparturesTable(object.boards[i], busstop, i);
 	}
-}
-
-function generateDeparturesTable(object, busstop, name) {
-
-	var div = document.createElement('div');
-
-	var head = document.createElement('h4');
-	head.innerHTML = name.split('|')[0];
-	div.appendChild(head);
-
-	var table = document.createElement('table');
-	div.appendChild(table);
-	var tr = document.createElement('tr');
-	table.appendChild(tr);
-
-	var busnumber = document.createElement('th');
-	busnumber.innerHTML = 'Busnumber';
-	var direction = document.createElement('th');
-	direction.innerHTML = 'Direction';
-	var time = document.createElement('th');
-	time.innerHTML = 'Departure time';
-
-	tr.appendChild(busnumber);
-	tr.appendChild(direction);
-	tr.appendChild(time);
-
-	for (let i = 0; i < object.length; i++) {
-		var tr1 = document.createElement('tr');
-		table.appendChild(tr1)
-		var tdnumber = document.createElement('td');
-		tr1.appendChild(tdnumber);
-		var tddirection = document.createElement('td');
-		tr1.appendChild(tddirection);
-		var tdtime = document.createElement('td');
-		tr1.appendChild(tdtime);
-
-		tdnumber.innerHTML = object[i].transport.name;
-		tddirection.innerHTML = object[i].transport.headsign.split('|')[0];
-
-		tdtime.innerHTML = object[i].time.split('T')[1].split('+')[0];
-
-		var date = object[i].time.split('T')[0]
-	}
-
-	busstop.bindPopup(div);
 }
 
 /**
@@ -109,23 +50,29 @@ function generateDeparturesTable(object, busstop, name) {
  * @returns array [latitude, longitude]
  */
 function getLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition( function (position) {
+	if (navigator.geolocation) {
+		navigator.geolocation.getCurrentPosition(function (position) {
 			var coordinates = [position.coords.latitude, position.coords.longitude];
 			getNextDepartures(coordinates);
 			return coordinates;
-        });
-    } else {
-        alert("Geolocation is not supported by this browser.");
-    }
+		});
+	} else {
+		alert("Geolocation is not supported by this browser.");
+	}
 }
 
 
 //get api Key from cookies
 const apiKey = document.cookie
-  .split('; ')
-  .find(row => row.startsWith('apiKey'))
-  .split('=')[1];
+	.split('; ')
+	.find(row => row.startsWith('apiKey'))
+	.split('=')[1];
+
+//get username from cookies
+const user = document.cookie
+	.split('; ')
+	.find(row => row.startsWith('cookie'))
+	.split('=')[1];
 
 var busIcon = L.icon({
 	// Icon from https://www.flaticon.com/de/autoren/freepik
@@ -133,5 +80,82 @@ var busIcon = L.icon({
 	iconSize: [38, 38]
 })
 
+function generateDeparturesTable(object, busstop, i) {
+
+
+	busstop.bindPopup(object.place.name);
+
+	var table = new Tabulator("#table"+(i+1), {
+		height: 205,
+		layout: "fitColumns",
+		columns: [
+			{ title: "From", field: "name"},
+			{ title: "Busnumber", field: "busnumber" },
+			{ title: "Direction", field: "direction" },
+			{ title: "Departure time", field: "departuretime" },
+			{ title: "Location", field: "location"},
+		],
+		rowClick: function (e, row) {
+
+			//Get data from row 
+			var busnumber = row.getData().busnumber;
+			var lat = parseFloat(row.getData().location.split(',')[0]);
+			var lng = parseFloat(row.getData().location.split(',')[1]);
+			var location = {lat, lng};
+			var date = row.getData().departuretime;
+			var name = row.getData().name;
+			//Create object
+			var newRide = {
+				"busnumber": busnumber,
+				"location": location,
+				"date": date,
+				"name": name
+			}
+			sendRideData(newRide);
+			alert('Added!');
+		}
+	});
+
+	var tabledata = [];
+
+	for (let i = 0; i < object.departures.length; i++) {
+		var departure = {
+			busnumber: object.departures[i].transport.name,
+			direction: object.departures[i].transport.headsign,
+			departuretime: object.departures[i].time.split('+')[0],
+			location: object.place.location.lat + "," + object.place.location.lng,
+			name: object.place.name
+		}
+		tabledata.push(departure);
+	}
+	table.setData(tabledata);
+
+	var now = document.getElementById('table'+(i+1));
+	var innerHtml = now.innerHTML;
+	//now.innerHTML = '<div><h5>'+name+'</h5></div>'+innerHtml;
+}
+
+function sendRideData(object) {
+	//POST request to /addride with newRide as Object
+	$.ajax({
+		type: "POST",
+		url: "http://localhost:3000/addride",
+		data: object,
+		success: console.log("Added ride")
+	  });
+}
+
+function getRides() {
+	//POST request to /getrides
+	$.ajax({
+		type: "POST",
+		url: "http://localhost:3000/getrides",
+		data: {username: user},
+		success: (resp) => {
+			console.log(resp);
+		}
+	  });
+}
 
 getLocation();
+getRides();
