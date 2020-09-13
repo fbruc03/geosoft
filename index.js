@@ -51,7 +51,22 @@ router.get('/', (req, res) => {
 router.get('/dashboard', (req, res) => {
     //ist cookie vorhanden?
     if (req.cookies.cookie !== undefined) {
-        res.sendFile(__dirname + '/views/dashboard.html');
+        if (req.cookies.role == 'doc') {
+            res.redirect('/doc');
+        }
+        else {
+            res.sendFile(__dirname + '/views/dashboard.html')
+        }
+    } else {
+        res.sendFile(__dirname + '/views/login.html');
+    }
+})
+
+//GET request to doc
+router.get('/doc', (req, res) => {
+    //ist cookie vorhanden?
+    if (req.cookies.cookie !== undefined) {
+        res.sendFile(__dirname + '/views/doc.html');
     } else {
         res.sendFile(__dirname + '/views/login.html');
     }
@@ -64,12 +79,7 @@ router.get('/myrides', (req, res) => {
 
 //GET request to login
 router.get('/login', (req, res) => {
-    //ist cookie vorhanden?
-    if (req.cookies.cookie !== undefined) {
-        res.sendFile(__dirname + '/views/rides.html');
-    } else {
-        res.sendFile(__dirname + '/views/login.html');
-    }
+    res.sendFile(__dirname + '/views/login.html');
 })
 
 /**
@@ -82,21 +92,37 @@ router.post('/login', (req, res) => {
     var password = req.body.password;
     var apiKey = req.body.apiKey;
     // Eingabe richtig?
-    User.exists({ 'username': username, 'password': password }, (err, result) => {
+    User.exists({ 'username': username, 'password': password, 'role': 'user' }, (err, result) => {
         if (err) {
             res.send(err);
             //Wenn nein -> Fehlermeldung
         } else if (result == false) {
-            res.send('try again');
+            User.exists({'username': username, 'password': password, 'role': 'doc'}, (err, result) => {
+                if (err) {
+                    res.send(err)
+                }
+                else if (result == false) {
+                    res.send('try again');
+                }
+                else if ( result == true) {
+                    //Cookie setzen maxAge 1000*1 = 1 Sekunde
+                    res.cookie('cookie', username, { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
+                    res.cookie('apiKey', apiKey, { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
+                    res.cookie('role', 'doc', { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
+                    res.redirect('/doc');
+                }
+            })
         }
         //Wenn ja -> User einloggen
         else if (result == true) {
             //Cookie setzen maxAge 1000*1 = 1 Sekunde
             res.cookie('cookie', username, { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
             res.cookie('apiKey', apiKey, { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
-            res.sendFile(__dirname + '/views/dashboard.html')
+            res.cookie('role', 'user', { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
+            res.redirect('/dashboard');
         }
     })
+
 })
 
 //GET request to register
@@ -134,7 +160,7 @@ router.post('/register', async (req, res) => {
                     if (err) {
                         res.send(err.message);
                     } else {
-                        res.sendFile(__dirname + '/views/login.html');
+                        res.redirect('/login');
                     }
                 })
             }
@@ -153,6 +179,7 @@ router.get('/logout', (req, res) => {
     //Cookie auf eine Millisekunde, dann weiterleiten
     res.cookie('cookie', '', { maxAge: 1, httpOnly: false });
     res.cookie('apiKey', '', { maxAge: 1, httpOnly: false });
+    res.cookie('role', '', { maxAge: 1, httpOnly: false });
     res.sendFile(__dirname + '/views/index.html');
 })
 
@@ -206,6 +233,17 @@ router.post('/getrides', (req, res) => {
 		}
 	});
 })
+
+function findUser(username) {
+    User.findOne({username: username}, (err, user) => {
+        if(err) {
+            return err;
+        }
+        if (user) {
+            return user.role;
+        }
+    });
+}
 
 app.use("/", router);
 
