@@ -174,7 +174,8 @@ router.post('/addride', (req, res) => {
         "busnumber": busnumber,
         "location": location,
         "date": date,
-        "name": name
+        "name": name,
+        "danger": "low"
     }
 
     //Add the takenBus ride to the user

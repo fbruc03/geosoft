@@ -145,17 +145,4 @@ function sendRideData(object) {
 	  });
 }
 
-function getRides() {
-	//POST request to /getrides
-	$.ajax({
-		type: "POST",
-		url: "http://localhost:3000/getrides",
-		data: {username: user},
-		success: (resp) => {
-			console.log(resp);
-		}
-	  });
-}
-
 getLocation();
-getRides();

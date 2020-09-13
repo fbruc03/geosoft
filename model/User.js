@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
         enum: ['low', 'medium', 'high']
     },
     takenBusses: {
-        type: [{busnumber: String, location: [Number, Number], date: String, name: String}]
+        type: [{busnumber: String, location: [Number, Number], date: String, name: String, danger: String}]
     }
 });
 
