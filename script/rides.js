@@ -48,13 +48,13 @@ function showRides(object) {
             { title: "From", field: "name"},
             { title: "Busnumber", field: "busnumber" },
             { title: "Departure time", field: "date" },
-            { title: "Infection risk", field: "danger"}
+            { title: "Infection risk", field: "risk"}
         ]
     })
     table.setData(object);
 
     for(var i = 0; i < object.length; i++) {
-        if(object[i].danger == 'high') {
+        if(object[i].risk == 'high') {
             var marker = L.marker([object[i].location[0],object[i].location[1]], {icon: virusIcon});
         }
         else {

@@ -19,12 +19,8 @@ const userSchema = new mongoose.Schema({
         required: [true, 'Please set your role'],
         enum: ['user','doc']
     },
-    danger: {
-        type: String,
-        enum: ['low', 'medium', 'high']
-    },
-    takenBusses: {
-        type: [{busnumber: String, location: [Number, Number], date: String, name: String, danger: String}]
+    ride: {
+        type: [mongoose.ObjectId]
     }
 });
 

@@ -101,7 +101,7 @@ function generateDeparturesTable(object, busstop, i) {
 			var busnumber = row.getData().busnumber;
 			var lat = parseFloat(row.getData().location.split(',')[0]);
 			var lng = parseFloat(row.getData().location.split(',')[1]);
-			var location = {lat, lng};
+			var location = [lat, lng];
 			var date = row.getData().departuretime;
 			var name = row.getData().name;
 			//Create object
@@ -129,13 +129,10 @@ function generateDeparturesTable(object, busstop, i) {
 		tabledata.push(departure);
 	}
 	table.setData(tabledata);
-
-	var now = document.getElementById('table'+(i+1));
-	var innerHtml = now.innerHTML;
-	//now.innerHTML = '<div><h5>'+name+'</h5></div>'+innerHtml;
 }
 
 function sendRideData(object) {
+	console.log(object);
 	//POST request to /addride with newRide as Object
 	$.ajax({
 		type: "POST",

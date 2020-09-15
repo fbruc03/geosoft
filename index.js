@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 
 
 var User = require(__dirname + '/model/User');
+var Ride = require(__dirname + '/model/Ride');
 
 var router = express.Router();
 
@@ -97,14 +98,14 @@ router.post('/login', (req, res) => {
             res.send(err);
             //Wenn nein -> Fehlermeldung
         } else if (result == false) {
-            User.exists({'username': username, 'password': password, 'role': 'doc'}, (err, result) => {
+            User.exists({ 'username': username, 'password': password, 'role': 'doc' }, (err, result) => {
                 if (err) {
                     res.send(err)
                 }
                 else if (result == false) {
                     res.send('try again');
                 }
-                else if ( result == true) {
+                else if (result == true) {
                     //Cookie setzen maxAge 1000*1 = 1 Sekunde
                     res.cookie('cookie', username, { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
                     res.cookie('apiKey', apiKey, { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
@@ -148,7 +149,6 @@ router.post('/register', async (req, res) => {
         newuser.username = username;
         newuser.role = role;
         newuser.password = password1;
-        newuser.danger = 'low';
 
         User.exists({ 'username': username }, (err, doc) => {
             if (err) {
@@ -186,64 +186,94 @@ router.get('/logout', (req, res) => {
 
 /**
  * @function addride
- * @desc add Bus ride to specific user
+ * @desc fahrt wird hinzugefügt, user referenz wird in fahrt gespeichert und fahrt referenz in user
  * @returns void
  */
 router.post('/addride', (req, res) => {
 
-    username = req.cookies.cookie;
+    var username = req.cookies.cookie;
+
     busnumber = req.body.busnumber;
-    location = [req.body.location.lat, req.body.location.lng];
+    location = req.body.location;
     date = req.body.date;
     name = req.body.name;
 
-    var takenBus = {
-        "busnumber": busnumber,
-        "location": location,
-        "date": date,
-        "name": name,
-        "danger": "low"
-    }
+    //Suche nach User für ObjectID
+    User.findOne({ username: username }, (err, resp) => {
+        if (err) {
+            console.log(err);
+        }
+        if (resp) {
 
-    //Add the takenBus ride to the user
-    User.findOneAndUpdate(
-        { username: username },
-        { $push: { takenBusses: takenBus } },
-        function (error, success) {
-            if (error) {
-                console.log(error);
-                res.send(error)
-            } else {
-                console.log(success);
-                res.sendFile(__dirname + '/views/dashboard.html')
-            }
-        });
+            var userId = resp._id;
+
+            var newRide = new Ride();
+            newRide.busnumber = busnumber;
+            newRide.location = location;
+            newRide.date = date;
+            newRide.name = name;
+            newRide.risk = "low";
+            newRide.user = [userId];
+
+            //Neue Fahrt speichern
+            newRide.save((err, savedRide) => {
+                if (err) {
+                    res.send(err);
+                }
+                if (savedRide) {
+                    //FahrtID zu User hinzufügen
+                    User.updateOne({_id: userId}, {$push: {ride: savedRide._id}}, (err, resp) => {
+                        if (err) {
+                            console.log(err);
+                        }
+                        if(resp) {
+                            console.log(resp);
+                        }
+                    })
+                }
+            })
+        }
+    })
 })
 
+//gibt ein array von allen genommenen fahrten des users zurück
 router.post('/getrides', (req, res) => {
 
-    username = req.body.username;
+    var username = req.body.username;
 
-    User.findOne({ username: username }, (err, resp) => {
-		if(err) {
-			res.send(err);
-		}
-		if(resp) {
-			res.send(resp.takenBusses);
-		}
-	});
+    User.findOne({username: username}, async (err, resp) => {
+        if (err) {
+            console.log(err);
+        }
+        if(resp) {
+            var data = [];
+            for (let i = 0; i < resp.ride.length; i++) {
+                var ride = await Ride.findOne({_id: resp.ride[i]})
+                .exec()
+                .then((resp) => {
+                    return resp;
+                })
+                .catch((err) => {
+                    return "error occured";
+                })
+                data.push(ride);
+            }
+            res.send(data);
+        }
+    })
 })
 
-function findUser(username) {
-    User.findOne({username: username}, (err, user) => {
-        if(err) {
-            return err;
+router.get('/getusers', (req, res) => {
+
+    User.findOne({}, (err, resp) => {
+        if (err) {
+            res.send(err);
         }
-        if (user) {
-            return user.role;
+        if (resp) {
+            res.send(resp)
         }
-    });
-}
+    })
+})
 
 app.use("/", router);
 
