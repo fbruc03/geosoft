@@ -34,7 +34,6 @@ function getRides() {
 		data: {username: user},
 		success: (resp) => {
             showRides(resp);
-			console.log(resp);
 		}
 	  });
 }
@@ -42,7 +41,6 @@ function getRides() {
 function showRides(object) {
 
     var table = new Tabulator("#departures", {
-        height: 205,
         layout: "fitColumns",
         columns: [
             { title: "From", field: "name"},

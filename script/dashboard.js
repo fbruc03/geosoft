@@ -86,7 +86,6 @@ function generateDeparturesTable(object, busstop, i) {
 	busstop.bindPopup(object.place.name);
 
 	var table = new Tabulator("#table"+(i+1), {
-		height: 205,
 		layout: "fitColumns",
 		columns: [
 			{ title: "From", field: "name"},
@@ -132,7 +131,6 @@ function generateDeparturesTable(object, busstop, i) {
 }
 
 function sendRideData(object) {
-	console.log(object);
 	//POST request to /addride with newRide as Object
 	$.ajax({
 		type: "POST",

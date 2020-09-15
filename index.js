@@ -304,6 +304,17 @@ router.post('/updaterisk', (req, res) => {
     })
 })
 
+router.get('/rides', (req, res) => {
+    Ride.find({}, (err, resp) => {
+        if(err) {
+            res.send(err);
+        }
+        if(resp) {
+            res.send(resp);
+        }
+    })
+})
+
 app.use("/", router);
 
 app.listen(3000, () => {

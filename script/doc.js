@@ -7,8 +7,41 @@ var OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{
 
 OpenStreetMap_Mapnik.addTo(mymap);
 
+var virusIcon = L.icon({
+	//Icons erstellt von https://www.flaticon.com/de/autoren/freepik
+	iconUrl: '/images/virus.png',
+	iconSize: [38, 38]
+})
+
+var gemueseIcon = L.icon({
+    //Icons erstellt von https://www.flaticon.com/de/autoren/icongeek26
+    iconUrl: '/images/gemuese.png',
+    iconSize: [38, 38]
+
+})
+
+function setMarkers() {
+    //GET request to /rides
+    $.ajax({
+        type: "GET",
+        url: "http://localhost:3000/rides",
+        success: (resp) => {
+            for (let i = 0; i < resp.length; i++) {
+                if(resp[i].risk == "low") {
+                    var marker = L.marker([resp[i].location[0],resp[i].location[1]], {icon: gemueseIcon});
+                    marker.addTo(mymap);
+                }
+                if(resp[i].risk == "high") {
+                    var marker = L.marker([resp[i].location[0],resp[i].location[1]], {icon: virusIcon});
+                    marker.addTo(mymap)
+                }
+            }
+        }
+    });
+}
+
 function getAllUsers() {
-    //GET request to /getrides
+    //GET request to /getusers
     $.ajax({
         type: "GET",
         url: "http://localhost:3000/getusers",
@@ -21,7 +54,6 @@ function getAllUsers() {
 function addUserRides(object) {
 
     var table = new Tabulator("#rides", {
-        height: 205,
         layout: "fitColumns",
         columns: [
             { title: "User", field: "user" },
@@ -32,7 +64,6 @@ function addUserRides(object) {
         ],
         rowClick: function (e, row) {
 
-            console.log(row.getData());
             var busnumber = row.getData().busnumber;
             var user = row.getData().user;
             var direction = row.getData().direction;
@@ -42,13 +73,12 @@ function addUserRides(object) {
             var r = confirm("Want to set the risk for this ride to 'high'?");
 
             if (r) {
-                //POST request to /getrides
+                //POST request to /updaterisk
                 $.ajax({
                     type: "POST",
                     data: {"busnumber": busnumber, "date": date},
                     url: "http://localhost:3000/updaterisk",
                     success: (resp) => {
-                        console.log(resp);
                     }
                 });
                 location.reload();
@@ -82,4 +112,5 @@ function addUserRides(object) {
     }
 }
 
+setMarkers();
 getAllUsers();
