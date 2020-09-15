@@ -265,7 +265,21 @@ router.post('/getrides', (req, res) => {
 
 router.get('/getusers', (req, res) => {
 
-    User.findOne({}, (err, resp) => {
+    User.find({role: "user"}, (err, resp) => {
+        if (err) {
+            res.send(err);
+        }
+        if (resp) {
+            res.send(resp)
+        }
+    })
+})
+
+router.post('/getrideinfo', (req, res) => {
+    
+    var rideId = req.body.id;
+
+    Ride.findOne({_id: rideId}, (err, resp) => {
         if (err) {
             res.send(err);
         }
