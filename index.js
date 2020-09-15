@@ -276,7 +276,7 @@ router.get('/getusers', (req, res) => {
 })
 
 router.post('/getrideinfo', (req, res) => {
-    
+
     var rideId = req.body.id;
 
     Ride.findOne({_id: rideId}, (err, resp) => {
@@ -285,6 +285,21 @@ router.post('/getrideinfo', (req, res) => {
         }
         if (resp) {
             res.send(resp)
+        }
+    })
+})
+
+router.post('/updaterisk', (req, res) => {
+
+    var busnumber = req.body.busnumber.toString();
+    var date = req.body.date;
+
+    Ride.updateMany({busnumber: busnumber},{ risk: "high"}, (err, resp) => {
+        if (err) {
+            res.send(err);
+        }
+        if (resp) {
+            res.send(resp);
         }
     })
 })

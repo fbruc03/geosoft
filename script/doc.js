@@ -8,7 +8,7 @@ var OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{
 OpenStreetMap_Mapnik.addTo(mymap);
 
 function getAllUsers() {
-    //POST request to /getrides
+    //GET request to /getrides
     $.ajax({
         type: "GET",
         url: "http://localhost:3000/getusers",
@@ -31,7 +31,29 @@ function addUserRides(object) {
             { title: "Risk", field: "risk" },
         ],
         rowClick: function (e, row) {
-            //!!!!!TODO!!!!!
+
+            console.log(row.getData());
+            var busnumber = row.getData().busnumber;
+            var user = row.getData().user;
+            var direction = row.getData().direction;
+            var date = row.getData().departuretime;
+            var risk = row.getData().risk;
+
+            var r = confirm("Want to set the risk for this ride to 'high'?");
+
+            if (r) {
+                //POST request to /getrides
+                $.ajax({
+                    type: "POST",
+                    data: {"busnumber": busnumber, "date": date},
+                    url: "http://localhost:3000/updaterisk",
+                    success: (resp) => {
+                        console.log(resp);
+                    }
+                });
+                location.reload();
+            }
+
         }
     })
 
