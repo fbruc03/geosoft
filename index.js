@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 
 
 var User = require(__dirname + '/model/User');
+var Ride = require(__dirname + '/model/Ride');
 
 var router = express.Router();
 
@@ -51,10 +52,30 @@ router.get('/', (req, res) => {
 router.get('/dashboard', (req, res) => {
     //ist cookie vorhanden?
     if (req.cookies.cookie !== undefined) {
-        res.sendFile(__dirname + '/views/dashboard.html');
+        if (req.cookies.role == 'doc') {
+            res.redirect('/doc');
+        }
+        else {
+            res.sendFile(__dirname + '/views/dashboard.html')
+        }
     } else {
         res.sendFile(__dirname + '/views/login.html');
     }
+})
+
+//GET request to doc
+router.get('/doc', (req, res) => {
+    //ist cookie vorhanden?
+    if (req.cookies.cookie !== undefined) {
+        res.sendFile(__dirname + '/views/doc.html');
+    } else {
+        res.sendFile(__dirname + '/views/login.html');
+    }
+})
+
+//GET request to rides
+router.get('/myrides', (req, res) => {
+    res.sendFile(__dirname + '/views/rides.html');
 })
 
 //GET request to login
@@ -72,21 +93,37 @@ router.post('/login', (req, res) => {
     var password = req.body.password;
     var apiKey = req.body.apiKey;
     // Eingabe richtig?
-    User.exists({ 'username': username, 'password': password }, (err, result) => {
+    User.exists({ 'username': username, 'password': password, 'role': 'user' }, (err, result) => {
         if (err) {
             res.send(err);
             //Wenn nein -> Fehlermeldung
         } else if (result == false) {
-            res.send('try again');
+            User.exists({ 'username': username, 'password': password, 'role': 'doc' }, (err, result) => {
+                if (err) {
+                    res.send(err)
+                }
+                else if (result == false) {
+                    res.send('try again');
+                }
+                else if (result == true) {
+                    //Cookie setzen maxAge 1000*1 = 1 Sekunde
+                    res.cookie('cookie', username, { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
+                    res.cookie('apiKey', apiKey, { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
+                    res.cookie('role', 'doc', { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
+                    res.redirect('/doc');
+                }
+            })
         }
         //Wenn ja -> User einloggen
         else if (result == true) {
             //Cookie setzen maxAge 1000*1 = 1 Sekunde
             res.cookie('cookie', username, { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
             res.cookie('apiKey', apiKey, { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
-            res.sendFile(__dirname + '/views/dashboard.html')
+            res.cookie('role', 'user', { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
+            res.redirect('/dashboard');
         }
     })
+
 })
 
 //GET request to register
@@ -112,7 +149,6 @@ router.post('/register', async (req, res) => {
         newuser.username = username;
         newuser.role = role;
         newuser.password = password1;
-        newuser.danger = 'low';
 
         User.exists({ 'username': username }, (err, doc) => {
             if (err) {
@@ -124,7 +160,7 @@ router.post('/register', async (req, res) => {
                     if (err) {
                         res.send(err.message);
                     } else {
-                        res.sendFile(__dirname + '/views/login.html');
+                        res.redirect('/login');
                     }
                 })
             }
@@ -143,57 +179,140 @@ router.get('/logout', (req, res) => {
     //Cookie auf eine Millisekunde, dann weiterleiten
     res.cookie('cookie', '', { maxAge: 1, httpOnly: false });
     res.cookie('apiKey', '', { maxAge: 1, httpOnly: false });
+    res.cookie('role', '', { maxAge: 1, httpOnly: false });
     res.sendFile(__dirname + '/views/index.html');
 })
 
 
 /**
  * @function addride
- * @desc add Bus ride to specific user
+ * @desc fahrt wird hinzugefügt, user referenz wird in fahrt gespeichert und fahrt referenz in user
  * @returns void
  */
 router.post('/addride', (req, res) => {
 
-    username = req.cookies.cookie;
+    var username = req.cookies.cookie;
+
     busnumber = req.body.busnumber;
-    location = [req.body.location.lat, req.body.location.lng];
+    location = req.body.location;
     date = req.body.date;
     name = req.body.name;
 
-    var takenBus = {
-        "busnumber": busnumber,
-        "location": location,
-        "date": date,
-        "name": name
-    }
+    //Suche nach User für ObjectID
+    User.findOne({ username: username }, (err, resp) => {
+        if (err) {
+            console.log(err);
+        }
+        if (resp) {
 
-    //Add the takenBus ride to the user
-    User.findOneAndUpdate(
-        { username: username },
-        { $push: { takenBusses: takenBus } },
-        function (error, success) {
-            if (error) {
-                console.log(error);
-                res.send(error)
-            } else {
-                console.log(success);
-                res.sendFile(__dirname + '/views/dashboard.html')
-            }
-        });
+            var userId = resp._id;
+
+            var newRide = new Ride();
+            newRide.busnumber = busnumber;
+            newRide.location = location;
+            newRide.date = date;
+            newRide.name = name;
+            newRide.risk = "low";
+            newRide.user = [userId];
+
+            //Neue Fahrt speichern
+            newRide.save((err, savedRide) => {
+                if (err) {
+                    res.send(err);
+                }
+                if (savedRide) {
+                    //FahrtID zu User hinzufügen
+                    User.updateOne({_id: userId}, {$push: {ride: savedRide._id}}, (err, resp) => {
+                        if (err) {
+                            console.log(err);
+                        }
+                        if(resp) {
+                            console.log(resp);
+                        }
+                    })
+                }
+            })
+        }
+    })
 })
 
+//gibt ein array von allen genommenen fahrten des users zurück
 router.post('/getrides', (req, res) => {
 
-    username = req.body.username;
+    var username = req.body.username;
 
-    User.findOne({ username: username }, (err, resp) => {
-		if(err) {
-			res.send(err);
-		}
-		if(resp) {
-			res.send(resp.takenBusses);
-		}
-	});
+    User.findOne({username: username}, async (err, resp) => {
+        if (err) {
+            console.log(err);
+        }
+        if(resp) {
+            var data = [];
+            for (let i = 0; i < resp.ride.length; i++) {
+                var ride = await Ride.findOne({_id: resp.ride[i]})
+                .exec()
+                .then((resp) => {
+                    return resp;
+                })
+                .catch((err) => {
+                    return "error occured";
+                })
+                data.push(ride);
+            }
+            res.send(data);
+        }
+    })
+})
+
+router.get('/getusers', (req, res) => {
+
+    User.find({role: "user"}, (err, resp) => {
+        if (err) {
+            res.send(err);
+        }
+        if (resp) {
+            res.send(resp)
+        }
+    })
+})
+
+router.post('/getrideinfo', (req, res) => {
+
+    var rideId = req.body.id;
+
+    Ride.findOne({_id: rideId}, (err, resp) => {
+        if (err) {
+            res.send(err);
+        }
+        if (resp) {
+            res.send(resp)
+        }
+    })
+})
+
+router.post('/updaterisk', (req, res) => {
+
+    var busnumber = req.body.busnumber.toString();
+    var date = req.body.date;
+
+    Ride.updateMany({busnumber: busnumber},{ risk: "high"}, (err, resp) => {
+        if (err) {
+            res.send(err);
+        }
+        if (resp) {
+            res.send(resp);
+        }
+    })
+})
+
+router.get('/rides', (req, res) => {
+    Ride.find({}, (err, resp) => {
+        if(err) {
+            res.send(err);
+        }
+        if(resp) {
+            res.send(resp);
+        }
+    })
 })
 
 app.use("/", router);

@@ -86,7 +86,6 @@ function generateDeparturesTable(object, busstop, i) {
 	busstop.bindPopup(object.place.name);
 
 	var table = new Tabulator("#table"+(i+1), {
-		height: 205,
 		layout: "fitColumns",
 		columns: [
 			{ title: "From", field: "name"},
@@ -97,11 +96,13 @@ function generateDeparturesTable(object, busstop, i) {
 		],
 		rowClick: function (e, row) {
 
-			//Get data from row 
+			var r = confirm("Want to add this ride?");
+			if(r) {
+				//Get data from row 
 			var busnumber = row.getData().busnumber;
 			var lat = parseFloat(row.getData().location.split(',')[0]);
 			var lng = parseFloat(row.getData().location.split(',')[1]);
-			var location = {lat, lng};
+			var location = [lat, lng];
 			var date = row.getData().departuretime;
 			var name = row.getData().name;
 			//Create object
@@ -113,6 +114,7 @@ function generateDeparturesTable(object, busstop, i) {
 			}
 			sendRideData(newRide);
 			alert('Added!');
+			}
 		}
 	});
 
@@ -129,10 +131,6 @@ function generateDeparturesTable(object, busstop, i) {
 		tabledata.push(departure);
 	}
 	table.setData(tabledata);
-
-	var now = document.getElementById('table'+(i+1));
-	var innerHtml = now.innerHTML;
-	//now.innerHTML = '<div><h5>'+name+'</h5></div>'+innerHtml;
 }
 
 function sendRideData(object) {
@@ -145,17 +143,35 @@ function sendRideData(object) {
 	  });
 }
 
-function getRides() {
-	//POST request to /getrides
+function checkRisk() {
+	console.log(user);
+	//request alle fahrten ids
+	//POST request to /getrides with newRide as Object
 	$.ajax({
 		type: "POST",
 		url: "http://localhost:3000/getrides",
 		data: {username: user},
 		success: (resp) => {
-			console.log(resp);
+			checkRides(resp);
 		}
 	  });
+
+	//request risk für alle fahrten
 }
 
+function checkRides(object) {
+	console.log(object);
+	var risk = false;
+	for (let i = 0; i < object.length; i++) {
+		if(object[i].risk == "high") {
+			risk = true;
+		}
+	}
+	if(risk == true) {
+		alert("This risk of one of your rides is marked as 'high'. Please take a look at 'My Rides' for more information");
+	}
+}
+
+checkRisk();
+
 getLocation();
-getRides();
