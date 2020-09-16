@@ -1,16 +1,24 @@
 const mongoose = require('mongoose');
 
 const rideSchema = new mongoose.Schema({
-    agency: {
+    location: {
+        type: [Number, Number]
+    },
+    busnumber: {
         type: String
     },
-    number: {
-        type: Number,
-        required: [true, 'Bus number is required']
+    date: {
+        type: String
     },
-    user : {
-        type: [[String, [Number, Number]]],
-        required: [true, 'Username and Location is required']
+    name: {
+        type: String
+    },
+    user: {
+        type: [mongoose.ObjectId]
+    },
+    risk: {
+        type: String,
+        enum: ["low", "high"]
     }
 });
 
