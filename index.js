@@ -293,12 +293,15 @@ router.post('/updaterisk', (req, res) => {
 
     var busnumber = req.body.busnumber.toString();
     var date = req.body.date;
+    date = date.split('T')[0];
 
-    Ride.updateMany({busnumber: busnumber},{ risk: "high"}, (err, resp) => {
+    Ride.updateMany({busnumber: busnumber, date: { "$regex": date}},{ risk: "high"}, (err, resp) => {
         if (err) {
+            console.log(err);
             res.send(err);
         }
         if (resp) {
+            console.log(resp);
             res.send(resp);
         }
     })

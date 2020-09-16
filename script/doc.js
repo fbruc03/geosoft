@@ -76,14 +76,13 @@ function addUserRides(object) {
                 //POST request to /updaterisk
                 $.ajax({
                     type: "POST",
-                    data: {"busnumber": busnumber, "date": date},
+                    data: {busnumber: busnumber, date: date},
                     url: "http://localhost:3000/updaterisk",
                     success: (resp) => {
+                        location.reload();
                     }
                 });
-                location.reload();
             }
-
         }
     })
 
