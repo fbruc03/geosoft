@@ -96,7 +96,9 @@ function generateDeparturesTable(object, busstop, i) {
 		],
 		rowClick: function (e, row) {
 
-			//Get data from row 
+			var r = confirm("Want to add this ride?");
+			if(r) {
+				//Get data from row 
 			var busnumber = row.getData().busnumber;
 			var lat = parseFloat(row.getData().location.split(',')[0]);
 			var lng = parseFloat(row.getData().location.split(',')[1]);
@@ -112,6 +114,7 @@ function generateDeparturesTable(object, busstop, i) {
 			}
 			sendRideData(newRide);
 			alert('Added!');
+			}
 		}
 	});
 
@@ -139,5 +142,36 @@ function sendRideData(object) {
 		success: console.log("Added ride")
 	  });
 }
+
+function checkRisk() {
+	console.log(user);
+	//request alle fahrten ids
+	//POST request to /getrides with newRide as Object
+	$.ajax({
+		type: "POST",
+		url: "http://localhost:3000/getrides",
+		data: {username: user},
+		success: (resp) => {
+			checkRides(resp);
+		}
+	  });
+
+	//request risk für alle fahrten
+}
+
+function checkRides(object) {
+	console.log(object);
+	var risk = false;
+	for (let i = 0; i < object.length; i++) {
+		if(object[i].risk == "high") {
+			risk = true;
+		}
+	}
+	if(risk == true) {
+		alert("This risk of one of your rides is marked as 'high'. Please take a look at 'My Rides' for more information");
+	}
+}
+
+checkRisk();
 
 getLocation();
