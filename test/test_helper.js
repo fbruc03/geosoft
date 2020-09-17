@@ -16,7 +16,6 @@ before((done) => {
 });
 
 //Terminiert alle Einträge in der users Collection der Datenbank
-
 beforeEach((done) => {
   mongoose.connection.collections.users.drop(() => {
     done();
