@@ -29,5 +29,5 @@ You can now access your rides via the navigation bar at the top. If you navigate
 - mocha
 - sinon
 
-# TESTIN #
+# TESTING #
 For testing type 'npm test' in the directory.
