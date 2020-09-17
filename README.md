@@ -23,5 +23,5 @@ You can now access your rides via the navigation bar at the top. If you navigate
 - express
 - jquery
 - leaflet
-- mongoose"
+- mongoose
 - tabulator-tables
