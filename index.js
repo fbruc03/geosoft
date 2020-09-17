@@ -222,11 +222,11 @@ router.post('/addride', (req, res) => {
                 }
                 if (savedRide) {
                     //FahrtID zu User hinzufügen
-                    User.updateOne({_id: userId}, {$push: {ride: savedRide._id}}, (err, resp) => {
+                    User.updateOne({ _id: userId }, { $push: { ride: savedRide._id } }, (err, resp) => {
                         if (err) {
                             console.log(err);
                         }
-                        if(resp) {
+                        if (resp) {
                             console.log(resp);
                         }
                     })
@@ -241,21 +241,21 @@ router.post('/getrides', (req, res) => {
 
     var username = req.body.username;
 
-    User.findOne({username: username}, async (err, resp) => {
+    User.findOne({ username: username }, async (err, resp) => {
         if (err) {
             console.log(err);
         }
-        if(resp) {
+        if (resp) {
             var data = [];
             for (let i = 0; i < resp.ride.length; i++) {
-                var ride = await Ride.findOne({_id: resp.ride[i]})
-                .exec()
-                .then((resp) => {
-                    return resp;
-                })
-                .catch((err) => {
-                    return "error occured";
-                })
+                var ride = await Ride.findOne({ _id: resp.ride[i] })
+                    .exec()
+                    .then((resp) => {
+                        return resp;
+                    })
+                    .catch((err) => {
+                        return "error occured";
+                    })
                 data.push(ride);
             }
             res.send(data);
@@ -265,7 +265,7 @@ router.post('/getrides', (req, res) => {
 
 router.get('/getusers', (req, res) => {
 
-    User.find({role: "user"}, (err, resp) => {
+    User.find({ role: "user" }, (err, resp) => {
         if (err) {
             res.send(err);
         }
@@ -279,7 +279,7 @@ router.post('/getrideinfo', (req, res) => {
 
     var rideId = req.body.id;
 
-    Ride.findOne({_id: rideId}, (err, resp) => {
+    Ride.findOne({ _id: rideId }, (err, resp) => {
         if (err) {
             res.send(err);
         }
@@ -295,7 +295,7 @@ router.post('/updaterisk', (req, res) => {
     var date = req.body.date;
     date = date.split('T')[0];
 
-    Ride.updateMany({busnumber: busnumber, date: { "$regex": date}},{ risk: "high"}, (err, resp) => {
+    Ride.updateMany({ busnumber: busnumber, date: { "$regex": date } }, { risk: "high" }, (err, resp) => {
         if (err) {
             console.log(err);
             res.send(err);
@@ -309,14 +309,71 @@ router.post('/updaterisk', (req, res) => {
 
 router.get('/rides', (req, res) => {
     Ride.find({}, (err, resp) => {
-        if(err) {
+        if (err) {
             res.send(err);
         }
-        if(resp) {
+        if (resp) {
             res.send(resp);
         }
     })
 })
+
+router.post('/setriskbydate', (req, res) => {
+
+    var username = req.body.username;
+    var from = new Date(req.body.from);
+    var to = new Date(req.body.to);
+
+    var dates = getDates(from, to);
+
+    User.findOne({ username: username }, (err, resp) => {
+        if (err) {
+            return res.send(err);
+        }
+        if (resp) {
+            var rideIds = resp.ride;
+            for (let i = 0; i < rideIds.length; i++) {
+                Ride.findOne({ _id: rideIds[i] }, (error, response) => {
+                    if (error) {
+                        return res.send(error)
+                    }
+                    if (response) {
+                        var busnumber = response.busnumber
+                        var date = response.date.split('T')[0];
+                        if (dates.includes(date)) {
+                            Ride.updateMany({ busnumber: busnumber, date: { "$regex": date }}, { risk: "high" }, (er, re) => {
+                                if (er) {
+                                    res.send(er);
+                                }
+                                if (re) {
+                                    console.log(busnumber, date, re);
+                                }
+                            })
+                        }
+                    }
+                })
+
+            }
+        }
+    })
+    res.redirect('/doc')
+})
+
+// Returns an array of dates between the two dates (code from https://gist.github.com/miguelmota/7905510 (a bit modified))
+var getDates = function (startDate, endDate) {
+    var dates = [],
+        currentDate = startDate,
+        addDays = function (days) {
+            var date = new Date(this.valueOf());
+            date.setDate(date.getDate() + days);
+            return date;
+        };
+    while (currentDate <= endDate) {
+        dates.push(currentDate.toISOString().split('T')[0]);
+        currentDate = addDays.call(currentDate, 1);
+    }
+    return dates;
+};
 
 app.use("/", router);
 

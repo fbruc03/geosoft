@@ -111,5 +111,88 @@ function addUserRides(object) {
     }
 }
 
+var div = document.getElementById('users');
+
+function generateForm() {
+
+    //GET request to /getusers
+    $.ajax({
+        type: "GET",
+        url: "http://localhost:3000/getusers",
+        success: (resp) => {
+            var usernames = [];
+            for (let i = 0; i < resp.length; i++) {
+                var username = resp[i].username;
+                usernames.push(username);
+            }
+            generateDropdown(usernames);
+        }
+    });
+}
+
+function generateDropdown(array) {
+
+    //Create and append form
+    var form = document.createElement("form");
+    form.action = "/setriskbydate";
+    form.method = "POST";
+    div.appendChild(form);
+
+    //Create and append select label
+    var selectLabel = document.createElement("label");
+    selectLabel.for = "usernamee";
+    selectLabel.innerHTML = "Select a user:";
+    form.appendChild(selectLabel);
+
+    //Create and append select list
+    var selectList = document.createElement("select");
+    selectList.name = "username"
+    selectList.id = "username";
+    form.appendChild(selectList);
+
+    //Create and append the options
+    for (var i = 0; i < array.length; i++) {
+        var option = document.createElement("option");
+        option.name = array[i];
+        option.id = array[i];
+        option.value = array[i];
+        option.text = array[i];
+        selectList.appendChild(option);
+    }
+
+    //Create and append from label
+    var fromLabel = document.createElement("label");
+    fromLabel.for = "from";
+    fromLabel.innerHTML = "From (e.g '2020-09-21'):";
+    form.appendChild(fromLabel);
+
+    //Create and append from input
+    var fromInput = document.createElement("input");
+    fromInput.id = "from";
+    fromInput.type = "text";
+    fromInput.name = "from";
+    form.appendChild(fromInput);
+
+    //Create and append to label
+    var toLabel = document.createElement("label");
+    toLabel.for = "to";
+    toLabel.innerHTML = "To (e.g '2020-09-21'):";
+    form.appendChild(toLabel);
+
+    //Create and append from input
+    var toInput = document.createElement("input");
+    toInput.id = "to";
+    toInput.type = "text";
+    toInput.name = "to";
+    form.appendChild(toInput);
+
+    //Create and append submit button
+    var submitButton = document.createElement('input');
+    submitButton.type = "submit";
+    submitButton.value = "Submit";
+    form.appendChild(submitButton);
+}
+
+generateForm();
 setMarkers();
 getAllUsers();
