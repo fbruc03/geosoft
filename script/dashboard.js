@@ -24,6 +24,7 @@ function getNextDepartures(location) {
 			mymap.setView(location, 16);
 			setLocationMarker(location);
 			setBusstops(response);
+			console.log(location)
 		},
 		error: function () { alert('Failed!'); }
 	});
