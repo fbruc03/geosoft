@@ -1,4 +1,9 @@
-#mapid { height: 600px; }
+#mapid {
+    height: 600px; }
+
+#users { 
+    text-align: center
+}
 
 .myForm
 {
@@ -13,6 +18,9 @@
 
 html {
     height: 100vh;
+}
+#users {
+    padding: 20px;
 }
 
 body {
@@ -43,3 +51,4 @@ tr {
 th {
     text-align: center;
 }
+

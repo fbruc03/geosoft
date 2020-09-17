@@ -40,7 +40,7 @@ db.once('open', function () {
 
 //GET request to /
 router.get('/', (req, res) => {
-    //ist cookie vorhanden?
+    //is cookie available?
     if (req.cookies.cookie !== undefined) {
         res.sendFile(__dirname + '/views/home.html');
     } else {
@@ -50,7 +50,7 @@ router.get('/', (req, res) => {
 
 //GET request to dashboard
 router.get('/dashboard', (req, res) => {
-    //ist cookie vorhanden?
+    //is cookie available?
     if (req.cookies.cookie !== undefined) {
         if (req.cookies.role == 'doc') {
             res.redirect('/doc');
@@ -65,7 +65,7 @@ router.get('/dashboard', (req, res) => {
 
 //GET request to doc
 router.get('/doc', (req, res) => {
-    //ist cookie vorhanden?
+    //is cookie available?
     if (req.cookies.cookie !== undefined) {
         res.sendFile(__dirname + '/views/doc.html');
     } else {
@@ -84,20 +84,18 @@ router.get('/login', (req, res) => {
 })
 
 /**
- * @function login
- * @desc login user and set cookies
- * @returns void
+ * User Login
  */
 router.post('/login', (req, res) => {
     var username = req.body.username;
     var password = req.body.password;
     var apiKey = req.body.apiKey;
-    // Eingabe richtig?
+    // does this user exists?
     User.exists({ 'username': username, 'password': password, 'role': 'user' }, (err, result) => {
         if (err) {
             res.send(err);
-            //Wenn nein -> Fehlermeldung
         } else if (result == false) {
+            //if not, check if doc exists
             User.exists({ 'username': username, 'password': password, 'role': 'doc' }, (err, result) => {
                 if (err) {
                     res.send(err)
@@ -105,8 +103,9 @@ router.post('/login', (req, res) => {
                 else if (result == false) {
                     res.send('try again');
                 }
+                //login as doc
                 else if (result == true) {
-                    //Cookie setzen maxAge 1000*1 = 1 Sekunde
+                    //set cookies maxAge 1000*1 = 1 second
                     res.cookie('cookie', username, { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
                     res.cookie('apiKey', apiKey, { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
                     res.cookie('role', 'doc', { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
@@ -114,9 +113,9 @@ router.post('/login', (req, res) => {
                 }
             })
         }
-        //Wenn ja -> User einloggen
+        //login as user
         else if (result == true) {
-            //Cookie setzen maxAge 1000*1 = 1 Sekunde
+            //set cookies maxAge 1000*1 = 1 second
             res.cookie('cookie', username, { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
             res.cookie('apiKey', apiKey, { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
             res.cookie('role', 'user', { maxAge: 1000 * 1 * 60 * 60, httpOnly: false });
@@ -132,9 +131,7 @@ router.get('/register', (req, res) => {
 })
 
 /**
- * @function register
- * @desc register new user
- * @returns void
+ * Register new user
  */
 router.post('/register', async (req, res) => {
     username = req.body.username;
@@ -142,20 +139,22 @@ router.post('/register', async (req, res) => {
     password1 = req.body.password1;
     password2 = req.body.password2;
 
-    //Stimmen passwörter überein?
+    //do passwords match?
     if (password2 == password1) {
-        // neues user objekt mit userSchema erzeugen
+        // new user object with mongoose schema
         var newuser = new User();
         newuser.username = username;
         newuser.role = role;
         newuser.password = password1;
 
+        //check if user already exists
         User.exists({ 'username': username }, (err, doc) => {
             if (err) {
                 res.send(err);
-            } else if (doc == true) { // username existiert bereits
+            } else if (doc == true) {
                 res.send('Username already exists')
-            } else { // username noch nicht vergeben -> neuen user erstellen
+            } else {
+                //save new user to db
                 newuser.save(function (err, savedUser) {
                     if (err) {
                         res.send(err.message);
@@ -171,12 +170,10 @@ router.post('/register', async (req, res) => {
 })
 
 /**
- * @function logout
- * @desc log out the user / delete cookies
- * @returns void
+ * user logout
  */
 router.get('/logout', (req, res) => {
-    //Cookie auf eine Millisekunde, dann weiterleiten
+    //set cookie to 1 millisecond and the redirect
     res.cookie('cookie', '', { maxAge: 1, httpOnly: false });
     res.cookie('apiKey', '', { maxAge: 1, httpOnly: false });
     res.cookie('role', '', { maxAge: 1, httpOnly: false });
@@ -185,9 +182,7 @@ router.get('/logout', (req, res) => {
 
 
 /**
- * @function addride
- * @desc fahrt wird hinzugefügt, user referenz wird in fahrt gespeichert und fahrt referenz in user
- * @returns void
+ *add new ride to db
  */
 router.post('/addride', (req, res) => {
 
@@ -198,7 +193,7 @@ router.post('/addride', (req, res) => {
     date = req.body.date;
     name = req.body.name;
 
-    //Suche nach User für ObjectID
+    //find user for objectId
     User.findOne({ username: username }, (err, resp) => {
         if (err) {
             console.log(err);
@@ -207,6 +202,7 @@ router.post('/addride', (req, res) => {
 
             var userId = resp._id;
 
+            //new ride with mongoose schema
             var newRide = new Ride();
             newRide.busnumber = busnumber;
             newRide.location = location;
@@ -215,18 +211,18 @@ router.post('/addride', (req, res) => {
             newRide.risk = "low";
             newRide.user = [userId];
 
-            //Neue Fahrt speichern
+            //save new ride to db
             newRide.save((err, savedRide) => {
                 if (err) {
                     res.send(err);
                 }
                 if (savedRide) {
-                    //FahrtID zu User hinzufügen
-                    User.updateOne({_id: userId}, {$push: {ride: savedRide._id}}, (err, resp) => {
+                    //save objectId from ride to the user
+                    User.updateOne({ _id: userId }, { $push: { ride: savedRide._id } }, (err, resp) => {
                         if (err) {
                             console.log(err);
                         }
-                        if(resp) {
+                        if (resp) {
                             console.log(resp);
                         }
                     })
@@ -236,26 +232,28 @@ router.post('/addride', (req, res) => {
     })
 })
 
-//gibt ein array von allen genommenen fahrten des users zurück
+/**
+ * get all rides from specific user by username
+ */
 router.post('/getrides', (req, res) => {
 
     var username = req.body.username;
 
-    User.findOne({username: username}, async (err, resp) => {
+    User.findOne({ username: username }, async (err, resp) => {
         if (err) {
             console.log(err);
         }
-        if(resp) {
+        if (resp) {
             var data = [];
             for (let i = 0; i < resp.ride.length; i++) {
-                var ride = await Ride.findOne({_id: resp.ride[i]})
-                .exec()
-                .then((resp) => {
-                    return resp;
-                })
-                .catch((err) => {
-                    return "error occured";
-                })
+                var ride = await Ride.findOne({ _id: resp.ride[i] })
+                    .exec()
+                    .then((resp) => {
+                        return resp;
+                    })
+                    .catch((err) => {
+                        return "error occured";
+                    })
                 data.push(ride);
             }
             res.send(data);
@@ -263,9 +261,12 @@ router.post('/getrides', (req, res) => {
     })
 })
 
+/**
+ * get all users with user role
+ */
 router.get('/getusers', (req, res) => {
 
-    User.find({role: "user"}, (err, resp) => {
+    User.find({ role: "user" }, (err, resp) => {
         if (err) {
             res.send(err);
         }
@@ -275,11 +276,14 @@ router.get('/getusers', (req, res) => {
     })
 })
 
+/**
+ * get information about a ride by its objectId
+ */
 router.post('/getrideinfo', (req, res) => {
 
     var rideId = req.body.id;
 
-    Ride.findOne({_id: rideId}, (err, resp) => {
+    Ride.findOne({ _id: rideId }, (err, resp) => {
         if (err) {
             res.send(err);
         }
@@ -289,12 +293,32 @@ router.post('/getrideinfo', (req, res) => {
     })
 })
 
+/**
+ * update risk of ride to high
+ */
 router.post('/updaterisk', (req, res) => {
 
     var busnumber = req.body.busnumber.toString();
     var date = req.body.date;
+    date = date.split('T')[0];
 
-    Ride.updateMany({busnumber: busnumber},{ risk: "high"}, (err, resp) => {
+    Ride.updateMany({ busnumber: busnumber, date: { "$regex": date } }, { risk: "high" }, (err, resp) => {
+        if (err) {
+            console.log(err);
+            res.send(err);
+        }
+        if (resp) {
+            console.log(resp);
+            res.send(resp);
+        }
+    })
+})
+
+/**
+ * get all rides
+ */
+router.get('/rides', (req, res) => {
+    Ride.find({}, (err, resp) => {
         if (err) {
             res.send(err);
         }
@@ -304,16 +328,70 @@ router.post('/updaterisk', (req, res) => {
     })
 })
 
-router.get('/rides', (req, res) => {
-    Ride.find({}, (err, resp) => {
-        if(err) {
-            res.send(err);
+/**
+ * set risk of rides depending on day and busnumber
+ */
+router.post('/setriskbydate', (req, res) => {
+
+    var username = req.body.username;
+    var from = new Date(req.body.from);
+    var to = new Date(req.body.to);
+
+    var dates = getDates(from, to);
+
+    User.findOne({ username: username }, (err, resp) => {
+        if (err) {
+            return res.send(err);
         }
-        if(resp) {
-            res.send(resp);
+        if (resp) {
+            var rideIds = resp.ride;
+            for (let i = 0; i < rideIds.length; i++) {
+                Ride.findOne({ _id: rideIds[i] }, (error, response) => {
+                    if (error) {
+                        return res.send(error)
+                    }
+                    if (response) {
+                        var busnumber = response.busnumber
+                        var date = response.date.split('T')[0];
+                        if (dates.includes(date)) {
+                            Ride.updateMany({ busnumber: busnumber, date: { "$regex": date }}, { risk: "high" }, (er, re) => {
+                                if (er) {
+                                    res.send(er);
+                                }
+                                if (re) {
+                                    console.log(busnumber, date, re);
+                                }
+                            })
+                        }
+                    }
+                })
+
+            }
         }
     })
+    res.redirect('/doc')
 })
+
+/**
+ * (code from https://gist.github.com/miguelmota/7905510 (a bit modified))
+ * @param {Date} startDate start
+ * @param {Date} endDate end
+ */
+var getDates = function (startDate, endDate) {
+    var dates = [],
+        currentDate = startDate,
+        addDays = function (days) {
+            var date = new Date(this.valueOf());
+            date.setDate(date.getDate() + days);
+            return date;
+        };
+    while (currentDate <= endDate) {
+        dates.push(currentDate.toISOString().split('T')[0]);
+        currentDate = addDays.call(currentDate, 1);
+    }
+    //returns start, end and all dates inbetween
+    return dates;
+};
 
 app.use("/", router);
 
