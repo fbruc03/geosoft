@@ -1,11 +1,11 @@
-# geosoft #
+# geosoft
 
 To start the app using the Node Package Manager type "npm install" and AFTER that "npm start" in the directory.
 To start the app using docker...
 
-# How to use this ap? #
+## How to use this ap?
 
-### User instructions:###
+### User instructions:
 For the login you need to register yourself through the form which you can access by pressing the button 'register' on the top right. Here you will have to select 'user'. This will grant you access to different parts of the app after login.
 
 Please select a username (with a minimum of 6 and a maximum of 64 characters) and a password (with a minimum of 6 and a maximum of 64 characters) for yourself. You'll also need to confirm your password and click the register button to complete the process.
@@ -17,7 +17,7 @@ You can now access your rides via the navigation bar at the top. If you navigate
 
 If one of your rides is marked as a 'high risk ride' you will get notified when open up your dashboard.
 
-### Doc instructions:###
+### Doc instructions:
 For the login you need to register yourself through the form which you can access by pressing the button 'register' on the top right. Here you will have to select 'doc'. This will grant you access to different parts of the app after login.
 
 Please select a username (with a minimum of 6 and a maximum of 64 characters) and a password (with a minimum of 6 and a maximum of 64 characters) for yourself. You'll also need to confirm your password and click the register button to complete the process.
@@ -25,7 +25,7 @@ Now you will be redirected to the login screen. To login you also need an api ke
 
 As you log in you can see a map with all rides stored in the database. You can see those rides below the map in a table too. If you want to mark a single ride as a 'high risk ride' click the table row and confirm the alert. If you want to mark every ride a user has taken between two specific dates use the form. Select the user from the dropdown and provide the two dates e.g. 2020-09-21.
 
-# USED NPM PACKAGES #
+## USED NPM PACKAGES
 - body-parser
 - bootstrap
 - cookie-parser
@@ -39,5 +39,5 @@ As you log in you can see a map with all rides stored in the database. You can s
 - mocha
 - sinon
 
-# TESTING #
+## TESTING
 For testing type 'npm test' in the directory.
