@@ -26,8 +26,14 @@ const user = document.cookie
 	.find(row => row.startsWith('cookie'))
 	.split('=')[1];
 
+
+/**
+ * GET rides by username
+ */
 function getRides() {
-	//POST request to /getrides
+	/**
+     * POST request to get all rides from username stored in cookie
+     */
 	$.ajax({
 		type: "POST",
 		url: "http://localhost:3000/getrides",
@@ -38,8 +44,13 @@ function getRides() {
 	  });
 }
 
+/**
+ * show rides from user as table and markers on map
+ * @param {Object} object 
+ */
 function showRides(object) {
 
+    //generate table with tabulator
     var table = new Tabulator("#departures", {
         layout: "fitColumns",
         columns: [
@@ -51,6 +62,9 @@ function showRides(object) {
     })
     table.setData(object);
 
+    /**
+     * iterate all rides from user
+     */
     for(var i = 0; i < object.length; i++) {
         if(object[i].risk == 'high') {
             var marker = L.marker([object[i].location[0],object[i].location[1]], {icon: virusIcon});

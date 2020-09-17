@@ -7,7 +7,14 @@ var OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{
 
 OpenStreetMap_Mapnik.addTo(mymap);
 
+/**
+ * Setup
+ * @param {Number} location location as array lat,lon
+ */
 function getNextDepartures(location) {
+	/**
+	 * GET request to here api for all departures of the 5 closest busstops from location
+	 */
 	$.ajax({
 		url: 'https://transit.hereapi.com/v8/departures?apiKey=' + apiKey + '&in=' + location,
 		type: 'GET',
@@ -80,11 +87,17 @@ var busIcon = L.icon({
 	iconSize: [38, 38]
 })
 
+/**
+ * 
+ * @param {Object} object Busstop object
+ * @param {Object} busstop marker of current busstop
+ * @param {Number} i iterate number 
+ */
 function generateDeparturesTable(object, busstop, i) {
-
 
 	busstop.bindPopup(object.place.name);
 
+	//generate table with tabulator
 	var table = new Tabulator("#table"+(i+1), {
 		layout: "fitColumns",
 		columns: [
@@ -98,7 +111,7 @@ function generateDeparturesTable(object, busstop, i) {
 
 			var r = confirm("Want to add this ride?");
 			if(r) {
-				//Get data from row 
+			//extract data from row 
 			var busnumber = row.getData().busnumber;
 			var lat = parseFloat(row.getData().location.split(',')[0]);
 			var lng = parseFloat(row.getData().location.split(',')[1]);
@@ -134,7 +147,9 @@ function generateDeparturesTable(object, busstop, i) {
 }
 
 function sendRideData(object) {
-	//POST request to /addride with newRide as Object
+	/**
+	 * POST request to add a ride to db
+	 */
 	$.ajax({
 		type: "POST",
 		url: "http://localhost:3000/addride",
@@ -144,9 +159,9 @@ function sendRideData(object) {
 }
 
 function checkRisk() {
-	console.log(user);
-	//request alle fahrten ids
-	//POST request to /getrides with newRide as Object
+	/**
+	 * POST request to get rides from username stored in cookie
+	 */
 	$.ajax({
 		type: "POST",
 		url: "http://localhost:3000/getrides",
@@ -155,12 +170,13 @@ function checkRisk() {
 			checkRides(resp);
 		}
 	  });
-
-	//request risk für alle fahrten
 }
 
+/**
+ * Check if risk of one ride is high
+ * @param {Object} object 
+ */
 function checkRides(object) {
-	console.log(object);
 	var risk = false;
 	for (let i = 0; i < object.length; i++) {
 		if(object[i].risk == "high") {

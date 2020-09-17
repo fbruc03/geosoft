@@ -8,9 +8,9 @@ var OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{
 OpenStreetMap_Mapnik.addTo(mymap);
 
 var virusIcon = L.icon({
-	//Icons erstellt von https://www.flaticon.com/de/autoren/freepik
-	iconUrl: '/images/virus.png',
-	iconSize: [38, 38]
+    //Icons erstellt von https://www.flaticon.com/de/autoren/freepik
+    iconUrl: '/images/virus.png',
+    iconSize: [38, 38]
 })
 
 var gemueseIcon = L.icon({
@@ -20,41 +20,59 @@ var gemueseIcon = L.icon({
 
 })
 
+/**
+ * Set markers with risk as icon on map
+ */
 function setMarkers() {
-    //GET request to /rides
+    /**
+    * GET request for all rides in db
+    */
     $.ajax({
         type: "GET",
         url: "http://localhost:3000/rides",
         success: (resp) => {
+            // iterate all rides
             for (let i = 0; i < resp.length; i++) {
-                if(resp[i].risk == "low") {
-                    var marker = L.marker([resp[i].location[0],resp[i].location[1]], {icon: gemueseIcon});
-                    marker.bindPopup('Busnumber: '+resp[i].busnumber+'<br>From: '+resp[i].name+'<br>At: '+resp[i].date)
+                // low risk
+                if (resp[i].risk == "low") {
+                    //use virus icon as marker
+                    var marker = L.marker([resp[i].location[0], resp[i].location[1]], { icon: gemueseIcon });
+                    marker.bindPopup('Busnumber: ' + resp[i].busnumber + '<br>From: ' + resp[i].name + '<br>At: ' + resp[i].date)
                     marker.addTo(mymap);
                 }
-                if(resp[i].risk == "high") {
-                    var marker = L.marker([resp[i].location[0],resp[i].location[1]], {icon: virusIcon});
-                    marker.bindPopup('Busnumber: '+resp[i].busnumber+'<br>From: '+resp[i].name+'<br>At: '+resp[i].date)
+                //high risk
+                if (resp[i].risk == "high") {
+                    // use virus icon as marker
+                    var marker = L.marker([resp[i].location[0], resp[i].location[1]], { icon: virusIcon });
+                    marker.bindPopup('Busnumber: ' + resp[i].busnumber + '<br>From: ' + resp[i].name + '<br>At: ' + resp[i].date)
                     marker.addTo(mymap)
                 }
             }
         }
     });
 }
-
+/**
+ * GET request for all users in db
+ */
 function getAllUsers() {
     //GET request to /getusers
     $.ajax({
         type: "GET",
         url: "http://localhost:3000/getusers",
         success: (resp) => {
+            // all users as object
             addUserRides(resp);
         }
     });
 }
 
+/**
+ * Generate table with click events and get ride information
+ * @param {object} object All users
+ */
 function addUserRides(object) {
 
+    //generate table with tabulator
     var table = new Tabulator("#rides", {
         layout: "fitColumns",
         columns: [
@@ -64,8 +82,10 @@ function addUserRides(object) {
             { title: "Departure time", field: "departuretime" },
             { title: "Risk", field: "risk" },
         ],
+        //Click event on a row
         rowClick: function (e, row) {
 
+            //extract data from a clicked row
             var busnumber = row.getData().busnumber;
             var user = row.getData().user;
             var direction = row.getData().direction;
@@ -75,12 +95,15 @@ function addUserRides(object) {
             var r = confirm("Want to set the risk for this ride to 'high'?");
 
             if (r) {
-                //POST request to /updaterisk
+                /**
+                 * POST request to set high risk
+                 */
                 $.ajax({
                     type: "POST",
-                    data: {busnumber: busnumber, date: date},
+                    data: { busnumber: busnumber, date: date },
                     url: "http://localhost:3000/updaterisk",
                     success: (resp) => {
+                        //reload page to see new results
                         location.reload();
                     }
                 });
@@ -88,12 +111,16 @@ function addUserRides(object) {
         }
     })
 
+    // iterate all users
     for (let i = 0; i < object.length; i++) {
+        //iterate all ride ids from user
         for (let j = 0; j < object[i].ride.length; j++) {
 
             var rideId = object[i].ride[j];
 
-            //POST request to /getrideinfo
+            /**
+             * POST request to get information about the ride
+             */
             $.ajax({
                 type: "POST",
                 data: { id: rideId },
@@ -106,6 +133,7 @@ function addUserRides(object) {
                         departuretime: resp.date,
                         risk: resp.risk
                     }
+                    //add object to tabulator table
                     table.addData(data);
                 }
             });
@@ -113,18 +141,23 @@ function addUserRides(object) {
     }
 }
 
-var div = document.getElementById('users');
-
+/**
+ * generate form for user and date input
+ */
 function generateForm() {
-
-    //GET request to /getusers
+    /**
+     * GET request for all users in db
+     */
     $.ajax({
         type: "GET",
         url: "http://localhost:3000/getusers",
         success: (resp) => {
+            //array for all usernames
             var usernames = [];
+            //iterate all users
             for (let i = 0; i < resp.length; i++) {
                 var username = resp[i].username;
+                //push username to username array
                 usernames.push(username);
             }
             generateDropdown(usernames);
@@ -132,7 +165,13 @@ function generateForm() {
     });
 }
 
+/**
+ * 
+ * @param {String} array all usernames
+ */
 function generateDropdown(array) {
+
+    var div = document.getElementById('users');
 
     //Create and append form
     var form = document.createElement("form");
