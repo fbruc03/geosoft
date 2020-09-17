@@ -29,10 +29,12 @@ function setMarkers() {
             for (let i = 0; i < resp.length; i++) {
                 if(resp[i].risk == "low") {
                     var marker = L.marker([resp[i].location[0],resp[i].location[1]], {icon: gemueseIcon});
+                    marker.bindPopup('Busnumber: '+resp[i].busnumber+'<br>From: '+resp[i].name+'<br>At: '+resp[i].date)
                     marker.addTo(mymap);
                 }
                 if(resp[i].risk == "high") {
                     var marker = L.marker([resp[i].location[0],resp[i].location[1]], {icon: virusIcon});
+                    marker.bindPopup('Busnumber: '+resp[i].busnumber+'<br>From: '+resp[i].name+'<br>At: '+resp[i].date)
                     marker.addTo(mymap)
                 }
             }
@@ -140,8 +142,8 @@ function generateDropdown(array) {
 
     //Create and append select label
     var selectLabel = document.createElement("label");
-    selectLabel.for = "usernamee";
-    selectLabel.innerHTML = "Select a user:";
+    selectLabel.for = "username";
+    selectLabel.innerHTML = "Select a user: ";
     form.appendChild(selectLabel);
 
     //Create and append select list
@@ -163,7 +165,7 @@ function generateDropdown(array) {
     //Create and append from label
     var fromLabel = document.createElement("label");
     fromLabel.for = "from";
-    fromLabel.innerHTML = "From (e.g '2020-09-21'):";
+    fromLabel.innerHTML = "From (e.g '2020-09-21'): ";
     form.appendChild(fromLabel);
 
     //Create and append from input
@@ -176,7 +178,7 @@ function generateDropdown(array) {
     //Create and append to label
     var toLabel = document.createElement("label");
     toLabel.for = "to";
-    toLabel.innerHTML = "To (e.g '2020-09-21'):";
+    toLabel.innerHTML = "To (e.g '2020-09-21'): ";
     form.appendChild(toLabel);
 
     //Create and append from input
