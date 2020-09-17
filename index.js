@@ -42,7 +42,7 @@ db.once('open', function () {
 router.get('/', (req, res) => {
     //is cookie available?
     if (req.cookies.cookie !== undefined) {
-        res.sendFile(__dirname + '/views/home.html');
+    res.sendFile(__dirname + '/views/home.html');
     } else {
         res.sendFile(__dirname + '/views/index.html');
     }
