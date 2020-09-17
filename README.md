@@ -1,4 +1,4 @@
-# geosoft
+### geosoft ###
 
 To start the app using the Node Package Manager type "npm install" and AFTER that "npm start" in the directory.
 To start the app using docker...
@@ -14,3 +14,14 @@ Now you will be redirected to the login screen, where you can login. To login yo
 As you log in you can see a map and will be asked if the browser may use your location, please answer this with yes to be able to use the site. If you're logged in as a user you'll see a map on your dashboard which will display your current location aswell as the closest five busstops in your area. Below the map is an interactive table which displays next five rides of every busstop and information about those rides. You can add a ride which you have taken by simply clicking on it in the table. This ride will then be stored within the database if you confirm the alert.
 
 You can now access your rides via the navigation bar at the top. If you navigate to My Rides, you'll see a map of your selected rides with further information within the popup as you click the specific marker on the map. Below the map is a table which contains all of your selected rides and information about the infection risk on those rides.
+
+# USED NPM PACKAGES #
+- body-parser
+- bootstrap
+- cookie-parser
+- cors
+- express
+- jquery
+- leaflet
+- mongoose"
+- tabulator-tables
