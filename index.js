@@ -354,7 +354,7 @@ router.post('/setriskbydate', (req, res) => {
                         var busnumber = response.busnumber
                         var date = response.date.split('T')[0];
                         if (dates.includes(date)) {
-                            Ride.updateMany({ busnumber: busnumber, date: { "$regex": date }}, { risk: "high" }, (er, re) => {
+                            Ride.updateMany({ busnumber: busnumber, date: { "$regex": date } }, { risk: "high" }, (er, re) => {
                                 if (er) {
                                     res.send(er);
                                 }
