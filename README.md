@@ -25,3 +25,9 @@ You can now access your rides via the navigation bar at the top. If you navigate
 - leaflet
 - mongoose
 - tabulator-tables
+- chai
+- mocha
+- sinon
+
+# TESTIN #
+For testing type 'npm test' in the directory.
