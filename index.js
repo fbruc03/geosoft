@@ -32,8 +32,19 @@ mongoose.connect('mongodb://mongo/geosoft', {
     useUnifiedTopology: true,
     useCreateIndex: true
 });
+
+function tryLocalhost() {
+    mongoose.connect('mongodb://localhost/geosoft', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true
+});
+}
 const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
+db.on('error', (err) => {
+    console.log('Could not connect to mongodb://mongo/geosoft, trying mongodb://localhost/geosoft next');
+    tryLocalhost();
+});
 db.once('open', function () {
     console.log('connected to database');
 });
