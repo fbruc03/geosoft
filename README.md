@@ -3,7 +3,7 @@
 To start the app using the Node Package Manager enter ```$ npm install && npm start``` in the directory.
 To start the app using docker enter ```$ docker-compose up```
 
-## How to use this ap?
+## How to use this app?
 
 ### User instructions:
 For the login you need to register yourself through the form which you can access by pressing the button 'register' on the top right. Here you will have to select 'user'. This will grant you access to different parts of the app after login.
@@ -35,9 +35,7 @@ As you log in you can see a map with all rides stored in the database. You can s
 - leaflet
 - mongoose
 - tabulator-tables
-- chai
 - mocha
-- sinon
 
 ## TESTING
 For testing enter ```$ npm test``` in the directory.

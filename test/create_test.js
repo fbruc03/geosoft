@@ -1,8 +1,4 @@
 var User = require('../model/User');
-var chai = require('chai')
-var chaiHttp = require('chai-http');
-
-chai.use(chaiHttp);
 
 
 //Testcase um einen User anzulegen
