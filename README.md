@@ -36,6 +36,11 @@ As you log in you can see a map with all rides stored in the database. You can s
 - mongoose
 - tabulator-tables
 - mocha
+- mongo
+
+
+## ADDITIONAL FEATURES
+- Password required for login
 
 ## TESTING
 For testing enter ```$ npm test``` in the directory.
