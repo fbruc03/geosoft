@@ -1,7 +1,7 @@
 # geosoft
 
-To start the app using the Node Package Manager enter $ npm install && npm start in the directory.
-To start the app using docker enter $ docker-compose up
+To start the app using the Node Package Manager enter ```$ npm install && npm start``` in the directory.
+To start the app using docker enter ```$ docker-compose up```
 
 ## How to use this ap?
 
@@ -40,7 +40,7 @@ As you log in you can see a map with all rides stored in the database. You can s
 - sinon
 
 ## TESTING
-For testing type 'npm test' in the directory.
+For testing enter ```$ npm test``` in the directory.
 
 ### [GITHUB REPO](https://github.com/fbruc03)
 
