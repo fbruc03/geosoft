@@ -5,6 +5,14 @@
     text-align: center
 }
 
+#departures {
+    padding-bottom: 15%;
+}
+
+#rides {
+    padding-bottom: 15%;
+}
+
 .myForm
 {
     width: 480px;
