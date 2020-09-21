@@ -1,7 +1,7 @@
 # geosoft
 
-To start the app using the Node Package Manager type "npm install" and AFTER that "npm start" in the directory.
-To start the app using docker...
+To start the app using the Node Package Manager enter ```$ npm install && npm start``` in the directory.
+To start the app using docker enter ```$ docker-compose up```
 
 ## How to use this ap?
 
@@ -9,7 +9,7 @@ To start the app using docker...
 For the login you need to register yourself through the form which you can access by pressing the button 'register' on the top right. Here you will have to select 'user'. This will grant you access to different parts of the app after login.
 
 Please select a username (with a minimum of 6 and a maximum of 64 characters) and a password (with a minimum of 6 and a maximum of 64 characters) for yourself. You'll also need to confirm your password and click the register button to complete the process.
-Now you will be redirected to the login screen. To login you also need an api key for the here api. You can get this by creating an account on the linked page below the api key field or here.
+Now you will be redirected to the login screen. To login you also need an api key for the HERE API. You can get this by creating an account on the linked page below the api key field or [here](https://developer.here.com/documentation/authentication/dev_guide/topics/api-key-credentials.html).
 
 As you log in you can see a map and will be asked if the browser may use your location, please answer this with yes to be able to use the site. You'll see a map on your dashboard which will display your current location aswell as the closest five busstops in your area. Below the map is an interactive table which displays next five rides of every busstop and information about those rides. You can add a ride which you have taken by simply clicking on it in the table. This ride will then be stored within the database if you confirm the alert.
 
@@ -40,4 +40,9 @@ As you log in you can see a map with all rides stored in the database. You can s
 - sinon
 
 ## TESTING
-For testing type 'npm test' in the directory.
+For testing enter ```$ npm test``` in the directory.
+
+### [GITHUB REPO](https://github.com/fbruc03)
+
+#### Authors
+Malte Tiemann & Frederick Bruch
