@@ -1,7 +1,9 @@
-version: "2"
+version: "3"
 services:
   web:
+    image: docker-node-mongo
     build: .
+    command: "npm start"
     ports:
       - "3000:3000"
     depends_on:
