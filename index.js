@@ -27,7 +27,7 @@ app.use('/script', express.static(__dirname + '/script/'));
 app.use('/images', express.static(__dirname + '/images/'));
 
 // DB connection
-mongoose.connect('mongodb://localhost:27017/geosoft', {
+mongoose.connect('mongodb://mongo/geosoft', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true
